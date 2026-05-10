@@ -3,178 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Global | International Asset Management</title>
+    <title>Zenith Global | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
-        .themed-bg { background: linear-gradient(135deg, #020617 0%, #061f15 50%, #020617 100%); }
-        .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
-        .sidebar { transition: transform 0.3s ease-in-out; transform: translateX(-100%); position: fixed; top: 0; left: 0; height: 100%; width: 260px; z-index: 100; background: #010409; }
-        .sidebar.active { transform: translateX(0); }
+        body { background-color: #020617; color: white; }
+        .stat-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="themed-bg min-h-screen overflow-x-hidden">
+<body class="bg-slate-950 min-h-screen">
 
-    <div id="sidebar" class="sidebar p-6 border-r border-slate-800 shadow-2xl">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-emerald-400 font-black text-xl italic tracking-tighter uppercase">Zenith <span class="text-white">Global</span></h2>
-            <button onclick="toggleMenu()"><i class="fas fa-times text-slate-500"></i></button>
+    <nav class="p-6 flex justify-between items-center border-b border-slate-900">
+        <h1 class="text-xl font-bold text-emerald-400">Zenith <span class="text-white text-sm">Global</span></h1>
+        <button onclick="logout()" class="text-xs bg-red-900/20 text-red-400 px-4 py-2 rounded-full border border-red-900/50">Logout</button>
+    </nav>
+
+    <div class="p-6 max-w-4xl mx-auto space-y-6">
+        <div class="stat-card p-8 rounded-[2rem] text-center">
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-1">Portfolio Balance</p>
+            <h2 class="text-5xl font-black text-white">$<span id="userBalance">0.00</span></h2>
+            <p class="text-emerald-500 text-[10px] mt-4 font-bold uppercase">Welcome back, <span id="userName">Investor</span></p>
         </div>
-        <nav class="space-y-6 font-semibold text-slate-400">
-            <a href="#" class="flex items-center hover:text-emerald-400 transition"><i class="fas fa-th-large w-10"></i> Dashboard</a>
-            <a href="#" class="flex items-center hover:text-emerald-400 transition"><i class="fas fa-wallet w-10"></i> Deposit</a>
-            <a href="#" class="flex items-center hover:text-emerald-400 transition"><i class="fas fa-upload w-10"></i> Withdraw</a>
-            <a href="#" class="flex items-center hover:text-emerald-400 transition"><i class="fas fa-users w-10"></i> Referral</a>
-            <a href="#" class="flex items-center hover:text-emerald-400 transition"><i class="fas fa-headset w-10"></i> Support</a>
-        </nav>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="stat-card p-6 rounded-3xl text-center hover:border-emerald-500/50 transition">
+                <div class="bg-emerald-500/10 h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span class="text-emerald-400 text-xl font-bold">+</span>
+                </div>
+                <h3 class="font-bold text-sm">Deposit</h3>
+                <p class="text-[9px] text-slate-500 mt-1">Fund your account securely.</p>
+            </div>
+            <div class="stat-card p-6 rounded-3xl text-center hover:border-orange-500/50 transition">
+                <div class="bg-orange-500/10 h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span class="text-orange-400 text-xl font-bold">↑</span>
+                </div>
+                <h3 class="font-bold text-sm">Withdraw</h3>
+                <p class="text-[9px] text-slate-500 mt-1">Instant payouts to your wallet.</p>
+            </div>
+        </div>
+
+        <div class="bg-blue-900/10 border border-blue-900/30 p-4 rounded-2xl flex items-center space-x-4">
+            <div class="text-blue-400 text-xl font-bold">ℹ</div>
+            <div>
+                <h4 class="text-xs font-bold text-blue-400">System Notification</h4>
+                <p class="text-[10px] text-slate-400">Your assets are protected by end-to-end encryption protocols.</p>
+            </div>
+        </div>
     </div>
 
-    <header class="p-6 max-w-lg mx-auto flex justify-between items-center">
-        <button onclick="toggleMenu()" class="text-2xl text-emerald-400"><i class="fas fa-bars-staggered"></i></button>
-        <div class="text-right">
-            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Account Balance</p>
-            <h2 class="text-2xl font-black text-emerald-400" id="userBalance">$0.00 <span class="text-xs text-slate-600">USDT</span></h2>
-        </div>
-    </header>
-
-    <main class="max-w-lg mx-auto p-6 pb-24 space-y-6">
-
-        <div class="glass-card rounded-[2rem] p-6 flex justify-between items-center relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest italic">Welcome, SHAMIM</p>
-                <h3 class="text-lg font-bold mt-1">International Assets</h3>
-            </div>
-            <i class="fas fa-globe-americas text-6xl text-emerald-500 opacity-10 absolute -right-2"></i>
-        </div>
-
-        <section class="glass-card p-6 rounded-[2rem] border-l-4 border-red-500">
-            <h3 class="text-sm font-black uppercase text-red-400 mb-4 tracking-wider italic">Quick Payout</h3>
-            <div class="space-y-3">
-                <select class="w-full bg-slate-900/50 p-3 rounded-xl border border-slate-700 outline-none text-sm">
-                    <option>Bkash (Personal)</option>
-                    <option>Nagad (Personal)</option>
-                </select>
-                <input type="text" placeholder="Wallet Number" class="w-full bg-slate-900/50 p-3 rounded-xl border border-slate-700 text-sm">
-                <input type="number" id="withdrawAmt" placeholder="Minimum $20 for first time" class="w-full bg-slate-900/50 p-3 rounded-xl border border-slate-700 text-sm">
-                <button onclick="checkWithdrawal()" class="w-full bg-red-600 hover:bg-red-500 py-3 rounded-xl font-black uppercase text-xs tracking-widest transition">Request Withdrawal</button>
-            </div>
-        </section>
-
-        <div class="flex items-center justify-between mt-8">
-            <h3 class="text-lg font-black uppercase italic text-slate-200">Investment Nodes</h3>
-            <span class="text-[10px] bg-emerald-900/30 text-emerald-400 px-3 py-1 rounded-full font-bold">LIVE USDT MARKET</span>
-        </div>
-
-        <div class="grid gap-5">
-            <div class="glass-card p-5 rounded-[2rem] border-l-4 border-blue-500 relative overflow-hidden">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="text-blue-400 font-bold uppercase text-[10px] tracking-widest italic">Starter Node V1</h4>
-                        <p class="text-3xl font-black mt-1">$6.00</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">Daily Income</p>
-                        <p class="text-lg font-bold text-emerald-400">+$1.00</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-400">Term: <span class="text-white">21 Days</span></p>
-                    <button class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-900/20">Purchase</button>
-                </div>
-            </div>
-
-            <div class="glass-card p-5 rounded-[2rem] border-l-4 border-slate-500 relative overflow-hidden">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest italic">Silver Node V2</h4>
-                        <p class="text-3xl font-black mt-1">$10.00</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">Daily Income</p>
-                        <p class="text-lg font-bold text-emerald-400">+$2.00</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-400">Term: <span class="text-white">21 Days</span></p>
-                    <button class="bg-slate-700 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Purchase</button>
-                </div>
-            </div>
-
-            <div class="glass-card p-5 rounded-[2rem] border-l-4 border-yellow-500 relative overflow-hidden">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="text-yellow-500 font-bold uppercase text-[10px] tracking-widest italic">Gold Node V3</h4>
-                        <p class="text-3xl font-black mt-1">$20.00</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">Daily Income</p>
-                        <p class="text-lg font-bold text-emerald-400">+$2.50</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-400">Term: <span class="text-white">30 Days</span></p>
-                    <button class="bg-yellow-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Purchase</button>
-                </div>
-            </div>
-
-            <div class="glass-card p-5 rounded-[2rem] border-l-4 border-purple-600 relative overflow-hidden">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="text-purple-500 font-bold uppercase text-[10px] tracking-widest italic">Elite Node V6</h4>
-                        <p class="text-3xl font-black mt-1">$90.00</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">Daily Income</p>
-                        <p class="text-lg font-bold text-emerald-400">+$4.00</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-400">Term: <span class="text-white">60 Days</span></p>
-                    <button class="bg-purple-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-purple-900/20">Purchase</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card p-6 rounded-3xl text-center">
-            <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-2 italic">Earn Unlimited</p>
-            <h4 class="text-sm font-bold">Share your link and get <span class="text-emerald-400">10% Instant Commission</span></h4>
-            <div class="mt-4 flex bg-slate-950 p-2 rounded-xl border border-slate-800">
-                <input type="text" readonly value="zenith-intl.io/ref/SHAMIM" class="bg-transparent text-xs w-full outline-none px-2 text-slate-400">
-                <button class="text-emerald-400 px-2"><i class="fas fa-copy"></i></button>
-            </div>
-        </div>
-
-    </main>
-
-    <footer class="text-center py-10 opacity-30">
-        <h2 class="text-xs font-black tracking-[0.3em] uppercase italic">Zenith Global Assets</h2>
-        <p class="text-[8px] mt-2 tracking-widest italic">SECURE CRYPTO INVESTMENT PLATFORM © 2026</p>
-    </footer>
-
-    <script>
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        let isFirstWithdrawal = true; // এটি ডাটাবেস থেকে আসবে
-
-        function checkWithdrawal() {
-            const amount = parseFloat(document.getElementById('withdrawAmt').value);
-            const minLimit = isFirstWithdrawal ? 20 : 1;
-
-            if (isNaN(amount)) {
-                alert("Please enter a valid amount.");
-                return;
-            }
-
-            if (amount < minLimit) {
-                alert("System Alert: Minimum withdrawal limit for this request is $" + minLimit + " USDT.");
-            } else {
-                alert("Withdrawal request of $" + amount + " submitted. Status: PENDING");
-            }
-        }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
