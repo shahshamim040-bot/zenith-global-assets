@@ -3,38 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Global | Asset Management</title>
+    <title>Zenith Global | Institutional Assets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #020617; 
-            color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            position: relative;
-            overflow-x: hidden;
-        }
-        /* লোগো ওয়ালপেপার বা ওয়াটারমার্ক */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70%;
-            height: 70%;
-            background: url('logo.png') no-repeat center;
-            background-size: contain;
-            opacity: 0.03;
-            z-index: -1;
-        }
-        .glass-nav { background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-card { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 28px; }
-        .balance-btn { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 18px; padding: 12px; text-align: center; }
+        body { background-color: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
+        body::before { content: ""; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: 60%; background: url('logo.png') no-repeat center; background-size: contain; opacity: 0.04; z-index: -1; }
+        .glass-header { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: #020617; z-index: 100; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid #1e293b; }
         .sidebar.active { left: 0; }
         .node-card { border-radius: 24px; padding: 22px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .node-card:active { scale: 0.98; }
         .page-section { display: none; animation: fadeIn 0.4s ease forwards; }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -42,29 +20,30 @@
 </head>
 <body class="pb-10">
 
-    <header class="sticky top-0 z-50 glass-nav p-5">
-        <div class="flex justify-between items-center mb-5">
-            <div onclick="toggleSidebar()" class="p-3 bg-slate-900 rounded-2xl border border-slate-800 cursor-pointer">
+    <header class="sticky top-0 z-50 glass-header p-5">
+        <div class="flex justify-between items-center mb-6">
+            <div onclick="toggleSidebar()" class="p-3 bg-slate-900 rounded-2xl border border-slate-800 cursor-pointer active:scale-90 transition">
                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16"></path></svg>
             </div>
             <div class="flex items-center space-x-2">
-                <img src="logo.png" class="h-8" alt="Logo">
-                <h1 class="text-sm font-black tracking-widest uppercase italic">Zenith</h1>
+                <img src="logo.png" class="h-8" alt="Zenith Logo">
+                <h1 class="text-sm font-black tracking-[0.2em] uppercase italic">Zenith Global</h1>
             </div>
-            <div class="w-10"></div> </div>
+            <div class="w-10"></div>
+        </div>
 
         <div class="grid grid-cols-3 gap-3">
-            <div class="balance-btn border-emerald-500/20">
-                <p class="text-[7px] font-bold text-emerald-500 uppercase tracking-widest">Main Wallet</p>
-                <h3 class="text-sm font-black italic text-emerald-400 leading-none mt-1">$<span id="mainBalance">0.00</span></h3>
+            <div class="bg-emerald-500/5 p-3 rounded-2xl border border-emerald-500/10 text-center">
+                <p class="text-[7px] font-bold text-emerald-500 uppercase tracking-widest">Available Fund</p>
+                <h3 class="text-sm font-black mt-1 italic">$<span id="mainBalance">0.00</span></h3>
             </div>
-            <div class="balance-btn border-blue-500/20">
+            <div class="bg-blue-500/5 p-3 rounded-2xl border border-blue-500/10 text-center">
                 <p class="text-[7px] font-bold text-blue-400 uppercase tracking-widest">Daily Yield</p>
-                <h3 class="text-sm font-black italic text-blue-400 leading-none mt-1">$<span id="dailyEarn">0.00</span></h3>
+                <h3 class="text-sm font-black mt-1 italic">$<span id="dailyEarn">0.00</span></h3>
             </div>
-            <div class="balance-btn border-purple-500/20">
-                <p class="text-[7px] font-bold text-purple-400 uppercase tracking-widest">Referral</p>
-                <h3 class="text-sm font-black italic text-purple-400 leading-none mt-1">$<span id="refEarn">0.00</span></h3>
+            <div class="bg-purple-500/5 p-3 rounded-2xl border border-purple-500/10 text-center">
+                <p class="text-[7px] font-bold text-purple-400 uppercase tracking-widest">Network Bonus</p>
+                <h3 class="text-sm font-black mt-1 italic">$<span id="refEarn">0.00</span></h3>
             </div>
         </div>
     </header>
@@ -73,114 +52,51 @@
         <div class="p-8 h-full flex flex-col">
             <div class="flex items-center space-x-3 mb-10 pb-6 border-b border-white/5">
                 <img src="logo.png" class="h-10" alt="Logo">
-                <h2 class="text-xl font-black italic uppercase text-emerald-400 tracking-tighter">Zenith <span class="text-white text-xs">Global</span></h2>
+                <h2 class="text-xl font-black uppercase text-emerald-400 italic">Zenith</h2>
             </div>
             <nav class="space-y-1 flex-grow">
-                <button onclick="showPage('dashboard')" class="w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">🏠 Dashboard</button>
-                <button onclick="showPage('deposit')" class="w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">💳 Add Funds</button>
-                <button onclick="showPage('withdraw')" class="w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">📤 Withdrawal</button>
-                <button onclick="showPage('referral')" class="w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">👥 My Network</button>
-                <button onclick="showPage('support')" class="w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">🎧 Support</button>
+                <button onclick="showPage('dashboard')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">Dashboard</button>
+                <button onclick="showPage('deposit')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">Add Assets</button>
+                <button onclick="showPage('withdraw')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">Withdrawal</button>
+                <button onclick="showPage('history')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">History</button>
+                <button onclick="showPage('support')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">Support</button>
             </nav>
-            <button onclick="logout()" class="p-4 text-red-500 font-black text-xs uppercase tracking-[0.2em] mt-auto">Logout Account</button>
+            <button onclick="logout()" class="p-4 text-red-500 font-black text-[10px] uppercase tracking-widest">Terminate Session</button>
         </div>
     </div>
 
     <main class="px-6 mt-6">
 
         <section id="dashboard" class="page-section active space-y-6">
-            <div class="flex items-center justify-between">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Investment Plans</h4>
-                <span class="flex items-center text-[8px] font-bold text-emerald-500 animate-pulse uppercase">● Auto-Yield Active</span>
-            </div>
-
-            <div class="space-y-4">
+            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Active Nodes</h4>
+            
+            <div id="plans" class="space-y-4">
                 <div class="node-card border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-black text-blue-500 uppercase">Plan 01</span>
-                            <h2 class="text-3xl font-black mt-1">$6.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">28 Days</span> | Total: <span class="text-emerald-400 font-bold">$21</span></p>
+                            <span class="text-[9px] font-bold text-blue-500 uppercase">Plan 01</span>
+                            <h2 class="text-3xl font-black mt-1 italic">$6.00</h2>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">28 Days | Total: <span class="text-emerald-400">$21.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
                             <p class="text-lg font-black text-emerald-400">+$0.75</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg shadow-blue-900/20">Purchase</button>
+                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="node-card border-l-4 border-slate-400">
+                <div class="node-card border-l-4 border-slate-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-black text-slate-400 uppercase">Plan 02</span>
-                            <h2 class="text-3xl font-black mt-1">$10.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">28 Days</span> | Total: <span class="text-emerald-400 font-bold">$30</span></p>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Plan 02</span>
+                            <h2 class="text-3xl font-black mt-1 italic">$10.00</h2>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">28 Days | Total: <span class="text-emerald-400">$30.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
                             <p class="text-lg font-black text-emerald-400">+$1.07</p>
-                            <button class="mt-4 bg-slate-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg shadow-slate-900/20">Purchase</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="node-card border-l-4 border-yellow-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] font-black text-yellow-500 uppercase">Plan 03</span>
-                            <h2 class="text-3xl font-black mt-1">$16.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">36 Days</span> | Total: <span class="text-emerald-400 font-bold">$40</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
-                            <p class="text-lg font-black text-emerald-400">+$1.11</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="node-card border-l-4 border-cyan-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] font-black text-cyan-500 uppercase">Plan 04</span>
-                            <h2 class="text-3xl font-black mt-1">$20.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">36 Days</span> | Total: <span class="text-emerald-400 font-bold">$60</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
-                            <p class="text-lg font-black text-emerald-400">+$1.66</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="node-card border-l-4 border-indigo-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] font-black text-indigo-500 uppercase">Plan 05</span>
-                            <h2 class="text-3xl font-black mt-1">$30.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">36 Days</span> | Total: <span class="text-emerald-400 font-bold">$90</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
-                            <p class="text-lg font-black text-emerald-400">+$2.50</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="node-card border-l-4 border-orange-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] font-black text-orange-500 uppercase">Plan 06</span>
-                            <h2 class="text-3xl font-black mt-1">$50.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">60 Days</span> | Total: <span class="text-emerald-400 font-bold">$150</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
-                            <p class="text-lg font-black text-emerald-400">+$2.50</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
+                            <button class="mt-4 bg-slate-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic">Purchase</button>
                         </div>
                     </div>
                 </div>
@@ -188,57 +104,91 @@
                 <div class="node-card border-l-4 border-emerald-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-black text-emerald-500 uppercase">Plan 07</span>
-                            <h2 class="text-3xl font-black mt-1">$90.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2">Term: <span class="text-white">60 Days</span> | Total: <span class="text-emerald-400 font-bold">$320</span></p>
+                            <span class="text-[9px] font-bold text-emerald-500 uppercase">Plan 07</span>
+                            <h2 class="text-3xl font-black mt-1 italic">$90.00</h2>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">60 Days | Total: <span class="text-emerald-400">$320.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Daily Profit</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
                             <p class="text-lg font-black text-emerald-400">+$5.33</p>
-                            <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
+                            <button class="mt-4 bg-emerald-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
                         </div>
+                    </div>
+                </div>
+                </div>
+        </section>
+
+        <section id="deposit" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-6">
+            <h2 class="text-xl font-black uppercase italic text-emerald-400">Add Assets</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Internal Rate: $1 = 128 BDT</p>
+                    <input type="number" id="usdInput" oninput="convertMoney(this.value)" placeholder="Enter Amount in USD ($)" class="w-full bg-transparent text-lg font-black outline-none text-white">
+                </div>
+                <div class="p-5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-center">
+                    <p class="text-[9px] font-bold text-emerald-500 uppercase mb-1">Payable Total</p>
+                    <h2 class="text-2xl font-black italic"><span id="bdtOutput">0</span> BDT</h2>
+                </div>
+                <p class="text-[10px] text-slate-500 italic">Send the BDT amount to Bkash/Nagad: <span class="text-white font-bold">+8801700000000</span></p>
+                <input type="text" placeholder="Transaction ID (TxID)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
+                <button class="w-full bg-emerald-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition">Submit Deposit</button>
+            </div>
+        </section>
+
+        <section id="withdraw" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-6">
+            <h2 class="text-xl font-black uppercase italic text-red-500">Withdraw Funds</h2>
+            <div class="space-y-4">
+                <select class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none focus:border-red-500 appearance-none">
+                    <option>Bkash Personal</option>
+                    <option>Nagad Personal</option>
+                    <option>Rocket Personal</option>
+                </select>
+                <input type="text" placeholder="Destination Account Number" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
+                <input type="number" placeholder="Withdrawal Amount (Min $20.00)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
+                <button onclick="requestWithdraw()" class="w-full bg-red-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg">Confirm Request</button>
+                <p class="text-[9px] text-slate-500 text-center italic uppercase tracking-tighter">Withdrawal processing time: 12-24 Hours</p>
+            </div>
+        </section>
+
+        <section id="support" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-8">
+            <h2 class="text-xl font-black uppercase italic text-blue-400">Institutional Support</h2>
+            <div class="space-y-6">
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-blue-500/10 rounded-xl text-xl">📧</div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase">General Inquiries</p>
+                        <p class="text-sm font-bold">zenithglobal@gmail.com</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-blue-500/10 rounded-xl text-xl">📍</div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase">USA Headquarters</p>
+                        <p class="text-sm font-bold leading-relaxed italic">712 Fifth Avenue, 35th Floor, New York, NY 10019, United States</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="deposit" class="page-section glass-card p-8 space-y-6">
-            <h2 class="text-xl font-black uppercase italic text-emerald-400">Deposit Funds</h2>
-            <div class="space-y-4">
-                <div class="p-4 bg-slate-900 rounded-2xl border border-white/5">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Bkash/Nagad (Admin)</p>
-                    <p id="adminNumber" class="text-lg font-black text-white italic">+8801700000000</p>
-                </div>
-                <form id="depositForm" class="space-y-4">
-                    <input type="text" placeholder="Transaction ID (TxID)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
-                    <label class="block text-[10px] text-slate-500 uppercase font-bold ml-1">Upload Payment Screenshot</label>
-                    <input type="file" class="w-full text-xs text-slate-400 file:bg-slate-800 file:border-none file:px-4 file:py-2 file:rounded-xl">
-                    <button class="w-full bg-emerald-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-900/30">Submit for Approval</button>
-                </form>
-            </div>
-        </section>
-
-        <section id="referral" class="page-section glass-card p-8 text-center space-y-6">
-            <h2 class="text-xl font-black uppercase italic text-purple-400">My Network</h2>
-            <p class="text-[11px] text-slate-400 px-4">Invite friends and get <span class="text-emerald-400 font-bold">$1.00 Auto-Reward</span> on every new signup via your link!</p>
-            <div class="bg-black/40 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                <p class="text-[10px] font-mono text-slate-500 truncate pr-4">zenith.intl/ref/sh-99</p>
-                <button onclick="alert('Link Copied!')" class="text-emerald-400">📋</button>
-            </div>
-        </section>
-
     </main>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="main.js"></script>
     <script>
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        
         function showPage(pageId) {
             document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             document.getElementById('sidebar').classList.remove('active');
+        }
+
+        function convertMoney(usd) {
+            const bdt = usd * 128;
+            document.getElementById('bdtOutput').innerText = bdt.toLocaleString();
+        }
+
+        function requestWithdraw() {
+            // International Style Alert
+            alert("Status: Withdrawal Request Pending.\nOur financial team will verify your transaction within 24 hours.");
         }
     </script>
 </body>
