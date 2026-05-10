@@ -3,40 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Zenith Global | Professional Portal</title>
+    <title>Zenith Global | Secure Assets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #020617; color: white; font-family: 'Inter', sans-serif; }
-        .auth-bg { background: linear-gradient(135deg, #020617 0%, #062016 100%); min-height: 100vh; }
-        .glass-auth { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .input-style { background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; color: white; }
     </style>
 </head>
-<body class="auth-bg flex items-center justify-center min-h-screen p-6">
+<body class="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-[#020617] to-[#062016]">
 
     <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-            <h2 class="text-2xl font-black italic tracking-tighter uppercase text-emerald-400">Zenith <span class="text-white">Global</span></h2>
-            <p class="text-[10px] text-slate-500 tracking-[0.3em] uppercase mt-2">Professional Asset Management</p>
+            <img src="logo.png" alt="Zenith" class="h-20 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+            <h2 class="text-3xl font-black tracking-tighter uppercase text-emerald-400">Zenith <span class="text-white">Global</span></h2>
+            <p class="text-[10px] text-emerald-500/70 tracking-[0.3em] uppercase mt-2">Elite Asset Management</p>
+            <p class="text-[11px] text-slate-500 italic mt-1 font-light px-4">Secure your future with world-class investment strategies.</p>
         </div>
 
-        <div class="glass-auth p-8 rounded-[2.5rem] shadow-2xl">
-            <div class="flex justify-center mb-8 space-x-6 text-sm font-bold uppercase tracking-widest">
-                <button type="button" onclick="showLogin()" id="loginBtn" class="text-emerald-400 border-b-2 border-emerald-400 pb-1">Login</button>
-                <button type="button" onclick="showRegister()" id="regBtn" class="text-slate-500 hover:text-white transition">Register</button>
+        <div class="glass-card p-8 rounded-[2.5rem] shadow-2xl">
+            <div class="flex justify-center mb-8 space-x-8 text-xs font-bold uppercase tracking-widest">
+                <button onclick="showLogin()" id="loginBtn" class="text-emerald-400 border-b-2 border-emerald-400 pb-1">Login</button>
+                <button onclick="showRegister()" id="regBtn" class="text-slate-500 hover:text-white transition">Register</button>
             </div>
 
             <form id="loginForm" class="space-y-4">
-                <input type="email" placeholder="Email Address" required class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <input type="password" placeholder="Password" required class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg shadow-emerald-900/20 transition">Sign In</button>
+                <input type="email" placeholder="Email Address" required class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <input type="password" placeholder="Password" required class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg shadow-emerald-900/30">Access Account</button>
             </form>
 
             <form id="registerForm" class="space-y-4 hidden">
-                <input type="text" placeholder="Full Name" required class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <input type="email" placeholder="Email Address" required class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <input type="password" placeholder="Create Password" required class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <input type="text" placeholder="Referral Code" class="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800 outline-none focus:border-emerald-500 transition text-sm text-white">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg shadow-blue-900/20 transition">Create Account</button>
+                <input type="text" placeholder="Full Name" required class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <input type="email" placeholder="Email Address" required class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <input type="password" placeholder="Create Password" required class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <input type="text" placeholder="Referral Email (Optional)" class="w-full input-style p-4 rounded-2xl outline-none focus:border-emerald-500 transition text-sm">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg shadow-blue-900/30">Create Account</button>
             </form>
         </div>
     </div>
@@ -44,21 +46,18 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script src="main.js"></script>
 
     <script>
         function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
             document.getElementById('loginBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-1";
             document.getElementById('regBtn').className = "text-slate-500 hover:text-white transition";
         }
-
         function showRegister() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('registerForm').classList.remove('hidden'); // hidden ক্লাসটি সরিয়ে দেয়
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
             document.getElementById('regBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-1";
             document.getElementById('loginBtn').className = "text-slate-500 hover:text-white transition";
         }
