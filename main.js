@@ -16,15 +16,18 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 2. Auth State Observer & Auto-Redirect
+// 2. Auth State Observer & Force Redirect (The Solution)
 auth.onAuthStateChanged(user => {
-    const isAuthPage = window.location.pathname.includes('auth.html');
+    const path = window.location.pathname;
+    const isAuthPage = path.includes('auth.html');
 
     if (!user) {
+        // If not logged in and NOT on auth page, force go to auth.html
         if (!isAuthPage) {
             window.location.href = 'auth.html';
         }
     } else {
+        // If logged in and on auth page, go to dashboard
         if (isAuthPage) {
             window.location.href = 'index.html';
         }
@@ -32,7 +35,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// 3. Registration Logic (Redirects to Login on Success)
+// 3. Registration Logic
 const regForm = document.getElementById('registerForm');
 if(regForm) {
     regForm.addEventListener('submit', (e) => {
@@ -53,12 +56,11 @@ if(regForm) {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }).then(() => {
-            // Sign out after registration so they have to log in manually
             auth.signOut().then(() => {
-                alert("Account created successfully! Please log in with your credentials.");
-                window.location.reload(); 
+                alert("Account created successfully! Please log in.");
+                window.location.href = 'auth.html'; 
             });
-        }).catch(err => alert("Registration Failed: " + err.message));
+        }).catch(err => alert("Error: " + err.message));
     });
 }
 
@@ -76,7 +78,7 @@ if(loginForm) {
     });
 }
 
-// 5. Load Real-time Dashboard Data
+// 5. Dashboard Data
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
         const data = doc.data();
@@ -87,29 +89,6 @@ function loadDashboardData(user) {
             if(document.getElementById('userName')) {
                 document.getElementById('userName').innerText = data.fullName;
             }
-            if(document.getElementById('userRefCode')) {
-                document.getElementById('userRefCode').value = data.email;
-            }
         }
     });
-}
-
-// 6. Logout Functionality
-function logout() {
-    auth.signOut().then(() => {
-        window.location.href = 'auth.html';
-    }).catch(err => alert(err.message));
-}
-
-// 7. Admin: Approve Deposit
-async function approveDeposit(userId, depositAmount) {
-    const userRef = db.collection('users').doc(userId);
-    try {
-        await userRef.update({
-            balance: firebase.firestore.FieldValue.increment(depositAmount)
-        });
-        alert("Deposit Approved!");
-    } catch (error) {
-        alert("Action Failed: " + error.message);
-    }
 }
