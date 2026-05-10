@@ -9,10 +9,10 @@
     <style>
         body { background-color: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
         body::before { content: ""; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: 60%; background: url('logo.png') no-repeat center; background-size: contain; opacity: 0.04; z-index: -1; }
-        .glass-header { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: #020617; z-index: 100; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid #1e293b; }
+        .glass-header { background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: #020617; z-index: 100; transition: 0.4s ease; border-right: 1px solid #1e293b; }
         .sidebar.active { left: 0; }
-        .node-card { border-radius: 24px; padding: 22px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .node-card { border-radius: 28px; padding: 24px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
         .page-section { display: none; animation: fadeIn 0.4s ease forwards; }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -27,23 +27,23 @@
             </div>
             <div class="flex items-center space-x-2">
                 <img src="logo.png" class="h-8" alt="Zenith Logo">
-                <h1 class="text-sm font-black tracking-[0.2em] uppercase italic">Zenith Global</h1>
+                <h1 class="text-xs font-black tracking-[0.2em] uppercase italic">Zenith Global</h1>
             </div>
             <div class="w-10"></div>
         </div>
 
         <div class="grid grid-cols-3 gap-3">
             <div class="bg-emerald-500/5 p-3 rounded-2xl border border-emerald-500/10 text-center">
-                <p class="text-[7px] font-bold text-emerald-500 uppercase tracking-widest">Available Fund</p>
-                <h3 class="text-sm font-black mt-1 italic">$<span id="mainBalance">0.00</span></h3>
+                <p class="text-[7px] font-bold text-emerald-500 uppercase tracking-widest">Main Fund</p>
+                <h3 class="text-sm font-black italic mt-1">$<span id="mainBalance">0.00</span></h3>
             </div>
             <div class="bg-blue-500/5 p-3 rounded-2xl border border-blue-500/10 text-center">
                 <p class="text-[7px] font-bold text-blue-400 uppercase tracking-widest">Daily Yield</p>
-                <h3 class="text-sm font-black mt-1 italic">$<span id="dailyEarn">0.00</span></h3>
+                <h3 class="text-sm font-black italic mt-1">$<span id="dailyEarn">0.00</span></h3>
             </div>
             <div class="bg-purple-500/5 p-3 rounded-2xl border border-purple-500/10 text-center">
-                <p class="text-[7px] font-bold text-purple-400 uppercase tracking-widest">Network Bonus</p>
-                <h3 class="text-sm font-black mt-1 italic">$<span id="refEarn">0.00</span></h3>
+                <p class="text-[7px] font-bold text-purple-400 uppercase tracking-widest">Referral</p>
+                <h3 class="text-sm font-black italic mt-1">$<span id="refEarn">0.00</span></h3>
             </div>
         </div>
     </header>
@@ -61,42 +61,57 @@
                 <button onclick="showPage('history')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">History</button>
                 <button onclick="showPage('support')" class="w-full text-left p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-400 transition">Support</button>
             </nav>
-            <button onclick="logout()" class="p-4 text-red-500 font-black text-[10px] uppercase tracking-widest">Terminate Session</button>
+            <button onclick="logout()" class="p-4 text-red-500 font-black text-[10px] uppercase tracking-widest">Logout Account</button>
         </div>
     </div>
 
     <main class="px-6 mt-6">
 
-        <section id="dashboard" class="page-section active space-y-6">
-            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Active Nodes</h4>
+        <section id="dashboard" class="page-section active space-y-5">
+            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] italic mb-4">Investment Nodes</h4>
             
-            <div id="plans" class="space-y-4">
+            <div id="plans-container" class="space-y-4">
                 <div class="node-card border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-bold text-blue-500 uppercase">Plan 01</span>
+                            <span class="text-[9px] font-bold text-blue-500 uppercase">Starter Node V1</span>
                             <h2 class="text-3xl font-black mt-1 italic">$6.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2 italic">28 Days | Total: <span class="text-emerald-400">$21.00</span></p>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">21 Days | Total: <span class="text-emerald-400">$21.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
-                            <p class="text-lg font-black text-emerald-400">+$0.75</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily Income</p>
+                            <p class="text-lg font-black text-emerald-400">+$1.00</p>
                             <button class="mt-4 bg-blue-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="node-card border-l-4 border-slate-500">
+                <div class="node-card border-l-4 border-slate-400">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">Plan 02</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Silver Node V2</span>
                             <h2 class="text-3xl font-black mt-1 italic">$10.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2 italic">28 Days | Total: <span class="text-emerald-400">$30.00</span></p>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">21 Days | Total: <span class="text-emerald-400">$42.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
-                            <p class="text-lg font-black text-emerald-400">+$1.07</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily Income</p>
+                            <p class="text-lg font-black text-emerald-400">+$2.00</p>
                             <button class="mt-4 bg-slate-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic">Purchase</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="node-card border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] font-bold text-yellow-500 uppercase">Gold Node V3</span>
+                            <h2 class="text-3xl font-black mt-1 italic">$20.00</h2>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">30 Days | Total: <span class="text-emerald-400">$75.00</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily Income</p>
+                            <p class="text-lg font-black text-emerald-400">+$2.50</p>
+                            <button class="mt-4 bg-yellow-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
                         </div>
                     </div>
                 </div>
@@ -104,64 +119,110 @@
                 <div class="node-card border-l-4 border-emerald-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-bold text-emerald-500 uppercase">Plan 07</span>
+                            <span class="text-[9px] font-bold text-emerald-500 uppercase">Elite Node V6</span>
                             <h2 class="text-3xl font-black mt-1 italic">$90.00</h2>
-                            <p class="text-[10px] text-slate-400 mt-2 italic">60 Days | Total: <span class="text-emerald-400">$320.00</span></p>
+                            <p class="text-[10px] text-slate-400 mt-2 italic">60 Days | Total: <span class="text-emerald-400">$240.00</span></p>
                         </div>
                         <div class="text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily</p>
-                            <p class="text-lg font-black text-emerald-400">+$5.33</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Daily Income</p>
+                            <p class="text-lg font-black text-emerald-400">+$4.00</p>
                             <button class="mt-4 bg-emerald-600 px-6 py-2 rounded-full text-[9px] font-black uppercase italic shadow-lg">Purchase</button>
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>
         </section>
 
-        <section id="deposit" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-6">
-            <h2 class="text-xl font-black uppercase italic text-emerald-400">Add Assets</h2>
+        <section id="deposit" class="page-section bg-slate-900/50 p-6 rounded-[32px] border border-white/5 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black uppercase italic text-emerald-400">Add Assets</h2>
+                <img src="logo.png" class="h-6 opacity-50" alt="Logo">
+            </div>
+
             <div class="space-y-4">
                 <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Internal Rate: $1 = 128 BDT</p>
-                    <input type="number" id="usdInput" oninput="convertMoney(this.value)" placeholder="Enter Amount in USD ($)" class="w-full bg-transparent text-lg font-black outline-none text-white">
+                    <p class="text-[9px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Amount in USD</p>
+                    <div class="flex items-center">
+                        <span class="text-xl font-black mr-2 text-emerald-500">$</span>
+                        <input type="number" id="usdInput" oninput="calculateDeposit(this.value)" placeholder="0.00" class="w-full bg-transparent text-2xl font-black outline-none text-white">
+                    </div>
                 </div>
-                <div class="p-5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-center">
-                    <p class="text-[9px] font-bold text-emerald-500 uppercase mb-1">Payable Total</p>
-                    <h2 class="text-2xl font-black italic"><span id="bdtOutput">0</span> BDT</h2>
+
+                <div class="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex justify-between items-center">
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">Rate: 1 USD = 128 BDT</p>
+                    <p class="text-lg font-black text-white italic"><span id="bdtOutput">0</span> BDT</p>
                 </div>
-                <p class="text-[10px] text-slate-500 italic">Send the BDT amount to Bkash/Nagad: <span class="text-white font-bold">+8801700000000</span></p>
-                <input type="text" placeholder="Transaction ID (TxID)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
-                <button class="w-full bg-emerald-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition">Submit Deposit</button>
+
+                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Select Payment Gateway</h4>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectGateway('bkash')" id="btn-bkash" class="p-4 bg-slate-800 rounded-2xl border border-white/5 flex flex-col items-center hover:border-pink-500 transition">
+                        <img src="bkash.png" class="h-6 mb-2" alt="Bkash">
+                        <span class="text-[8px] font-black uppercase tracking-tighter">Bkash Personal</span>
+                    </button>
+                    <button onclick="selectGateway('nagad')" id="btn-nagad" class="p-4 bg-slate-800 rounded-2xl border border-white/5 flex flex-col items-center hover:border-orange-500 transition">
+                        <img src="nagad.png" class="h-6 mb-2" alt="Nagad">
+                        <span class="text-[8px] font-black uppercase tracking-tighter">Nagad Personal</span>
+                    </button>
+                </div>
+
+                <div id="payment-details" class="hidden space-y-4 pt-4 border-t border-white/5">
+                    <div class="p-4 bg-black/60 rounded-2xl border border-dashed border-white/20 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Send Money to <span id="gatewayName"></span></p>
+                        <h2 id="activeNumber" class="text-xl font-black tracking-widest text-emerald-400">017XXXXXXXX</h2>
+                    </div>
+
+                    <div class="space-y-3">
+                        <input type="text" id="senderNumber" placeholder="Your Sender Number" class="w-full bg-slate-800 border border-white/10 p-4 rounded-2xl text-xs outline-none focus:border-emerald-500">
+                        
+                        <div class="relative">
+                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-700 border-dashed rounded-2xl cursor-pointer bg-slate-800/50 hover:bg-slate-800 transition">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase italic text-center">Upload Screenshot<br><span class="text-[8px]">(Mandatory)</span></p>
+                                </div>
+                                <input type="file" id="screenshot" class="hidden" accept="image/*">
+                            </label>
+                        </div>
+
+                        <button onclick="finalizeDeposit()" class="w-full bg-emerald-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl active:scale-95 transition">Verify Transaction</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section id="withdraw" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-6">
+        <section id="withdraw" class="page-section bg-slate-900/50 p-8 rounded-[32px] border border-white/5 space-y-6">
             <h2 class="text-xl font-black uppercase italic text-red-500">Withdraw Funds</h2>
             <div class="space-y-4">
-                <select class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none focus:border-red-500 appearance-none">
+                <select class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-red-500 appearance-none">
                     <option>Bkash Personal</option>
                     <option>Nagad Personal</option>
-                    <option>Rocket Personal</option>
                 </select>
-                <input type="text" placeholder="Destination Account Number" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
-                <input type="number" placeholder="Withdrawal Amount (Min $20.00)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
+                <input type="text" placeholder="Wallet Number" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
+                <input type="number" placeholder="Amount (Min $20.00)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xs outline-none">
                 <button onclick="requestWithdraw()" class="w-full bg-red-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg">Confirm Request</button>
-                <p class="text-[9px] text-slate-500 text-center italic uppercase tracking-tighter">Withdrawal processing time: 12-24 Hours</p>
             </div>
         </section>
 
-        <section id="support" class="page-section bg-slate-900/50 p-8 rounded-[28px] border border-white/5 space-y-8">
-            <h2 class="text-xl font-black uppercase italic text-blue-400">Institutional Support</h2>
+        <section id="history" class="page-section bg-slate-900/50 p-8 rounded-[32px] border border-white/5 space-y-4">
+            <h2 class="text-xl font-black uppercase italic text-blue-400">Transaction Log</h2>
+            <div id="historyContainer" class="space-y-3">
+                <p class="text-[10px] text-slate-500 text-center italic">No history recorded yet.</p>
+            </div>
+        </section>
+
+        <section id="support" class="page-section bg-slate-900/50 p-8 rounded-[32px] border border-white/5 space-y-8">
+            <h2 class="text-xl font-black uppercase italic text-blue-400">Institutional Help</h2>
             <div class="space-y-6">
                 <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-blue-500/10 rounded-xl text-xl">📧</div>
+                    <div class="p-3 bg-blue-500/10 rounded-xl">📧</div>
                     <div>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase">General Inquiries</p>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase">Support Email</p>
                         <p class="text-sm font-bold">zenithglobal@gmail.com</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-blue-500/10 rounded-xl text-xl">📍</div>
+                    <div class="p-3 bg-blue-500/10 rounded-xl">📍</div>
                     <div>
                         <p class="text-[9px] font-bold text-slate-500 uppercase">USA Headquarters</p>
                         <p class="text-sm font-bold leading-relaxed italic">712 Fifth Avenue, 35th Floor, New York, NY 10019, United States</p>
@@ -173,6 +234,12 @@
     </main>
 
     <script>
+        // এডমিন পেনেল ডাটা (এখান থেকে নাম্বার চেঞ্জ করবেন)
+        const gatewayNumbers = {
+            bkash: "017XXXXXXXX",
+            nagad: "019XXXXXXXX"
+        };
+
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
         
         function showPage(pageId) {
@@ -181,13 +248,33 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        function convertMoney(usd) {
-            const bdt = usd * 128;
-            document.getElementById('bdtOutput').innerText = bdt.toLocaleString();
+        function calculateDeposit(usd) {
+            document.getElementById('bdtOutput').innerText = (usd * 128).toLocaleString();
+        }
+
+        function selectGateway(type) {
+            document.getElementById('payment-details').classList.remove('hidden');
+            document.getElementById('gatewayName').innerText = type.toUpperCase();
+            document.getElementById('activeNumber').innerText = gatewayNumbers[type];
+            
+            document.getElementById('btn-bkash').classList.remove('border-pink-500');
+            document.getElementById('btn-nagad').classList.remove('border-orange-500');
+            if(type === 'bkash') document.getElementById('btn-bkash').classList.add('border-pink-500');
+            if(type === 'nagad') document.getElementById('btn-nagad').classList.add('border-orange-500');
+        }
+
+        function finalizeDeposit() {
+            const sender = document.getElementById('senderNumber').value;
+            const screenshot = document.getElementById('screenshot').files[0];
+            
+            if(!sender || !screenshot) {
+                alert("CRITICAL ERROR: Please provide both sender number and payment screenshot.");
+                return;
+            }
+            alert("Status: Deposit Request Pending. Verification in progress.");
         }
 
         function requestWithdraw() {
-            // International Style Alert
             alert("Status: Withdrawal Request Pending.\nOur financial team will verify your transaction within 24 hours.");
         }
     </script>
