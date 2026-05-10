@@ -1,4 +1,4 @@
-// 1. আপনার Firebase কনফিগারেশন (আপডেট করা API Key সহ)
+// 1. Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjIE0s11xgu8KqVkY",
   authDomain: "zenith-global-assets.firebaseapp.com",
@@ -9,12 +9,30 @@ const firebaseConfig = {
   measurementId: "G-ZWGBSYVZ18"
 };
 
-// Firebase কানেক্ট করা
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 2. রেজিস্ট্রেশন লজিক (নতুন ইউজার একাউন্ট খোলা)
+// 2. Auth State Observer & Auto-Redirect
+auth.onAuthStateChanged(user => {
+    const isAuthPage = window.location.pathname.includes('auth.html');
+
+    if (!user) {
+        if (!isAuthPage) {
+            window.location.href = 'auth.html';
+        }
+    } else {
+        if (isAuthPage) {
+            window.location.href = 'index.html';
+        }
+        loadDashboardData(user);
+    }
+});
+
+// 3. Registration Logic (Redirects to Login on Success)
 const regForm = document.getElementById('registerForm');
 if(regForm) {
     regForm.addEventListener('submit', (e) => {
@@ -22,27 +40,29 @@ if(regForm) {
         const name = regForm[0].value;
         const email = regForm[1].value;
         const password = regForm[2].value;
-        const refCode = regForm[3].value; // এখানে রেফারার এর ইমেইল দিতে হবে
+        const refCode = regForm[3].value;
 
         auth.createUserWithEmailAndPassword(email, password).then(cred => {
-            // ইউজারের ডাটাবেস ফাইল তৈরি
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: name,
                 email: email,
                 balance: 0.00,
                 referralEarnings: 0.00,
                 refBy: refCode || "none",
-                isFirstDepositDone: false, // এটি নিশ্চিত করবে বোনাস যেন একবারই যায়
+                isFirstDepositDone: false,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }).then(() => {
-            alert("Account Created Successfully!");
-            window.location.href = 'index.html';
-        }).catch(err => alert("Registration Error: " + err.message));
+            // Sign out after registration so they have to log in manually
+            auth.signOut().then(() => {
+                alert("Account created successfully! Please log in with your credentials.");
+                window.location.reload(); 
+            });
+        }).catch(err => alert("Registration Failed: " + err.message));
     });
 }
 
-// 3. লগইন লজিক
+// 4. Login Logic
 const loginForm = document.getElementById('loginForm');
 if(loginForm) {
     loginForm.addEventListener('submit', (e) => {
@@ -52,59 +72,44 @@ if(loginForm) {
 
         auth.signInWithEmailAndPassword(email, password).then(() => {
             window.location.href = 'index.html';
-        }).catch(err => alert("Invalid Login: " + err.message));
+        }).catch(err => alert("Login Failed: " + err.message));
     });
 }
 
-// 4. ডিপোজিট ও রেফারেল বোনাস অ্যাপ্রুভাল (অ্যাডমিন ফাংশন)
-// এটি আপনি আপনার Admin Panel থেকে কল করবেন
-async function approveDeposit(transactionId, userId, depositAmount) {
-    const userRef = db.collection('users').doc(userId);
-
-    try {
-        // ১. ইউজারের মূল ব্যালেন্স বাড়ানো
-        await userRef.update({
-            balance: firebase.firestore.FieldValue.increment(depositAmount)
-        });
-
-        // ২. রেফারেল বোনাস লজিক চেক
-        const userDoc = await userRef.get();
-        const userData = userDoc.data();
-
-        // যদি ইউজারের রেফারার থাকে এবং এটি তার প্রথম ডিপোজিট হয়
-        if (userData.refBy && userData.refBy !== "none" && !userData.isFirstDepositDone) {
-            const referrerQuery = await db.collection('users').where('email', '==', userData.refBy).get();
-            
-            if (!referrerQuery.empty) {
-                const referrerDoc = referrerQuery.docs[0];
-                const bonus = depositAmount * 0.10; // ১০% বোনাস
-
-                await db.collection('users').doc(referrerDoc.id).update({
-                    balance: firebase.firestore.FieldValue.increment(bonus),
-                    referralEarnings: firebase.firestore.FieldValue.increment(bonus)
-                });
-            }
-            // প্রথম ডিপোজিট সম্পন্ন হিসেবে মার্ক করা
-            await userRef.update({ isFirstDepositDone: true });
-        }
-
-        alert("Deposit Approved & Bonus Distributed!");
-    } catch (error) {
-        alert("System Error: " + error.message);
-    }
-}
-
-// ৫. ড্যাশবোর্ডে ইউজারের তথ্য দেখানো
-auth.onAuthStateChanged(user => {
-    if (user) {
-        db.collection('users').doc(user.uid).onSnapshot(doc => {
-            const data = doc.data();
+// 5. Load Real-time Dashboard Data
+function loadDashboardData(user) {
+    db.collection('users').doc(user.uid).onSnapshot(doc => {
+        const data = doc.data();
+        if(data) {
             if(document.getElementById('userBalance')) {
                 document.getElementById('userBalance').innerText = data.balance.toFixed(2);
+            }
+            if(document.getElementById('userName')) {
+                document.getElementById('userName').innerText = data.fullName;
             }
             if(document.getElementById('userRefCode')) {
                 document.getElementById('userRefCode').value = data.email;
             }
+        }
+    });
+}
+
+// 6. Logout Functionality
+function logout() {
+    auth.signOut().then(() => {
+        window.location.href = 'auth.html';
+    }).catch(err => alert(err.message));
+}
+
+// 7. Admin: Approve Deposit
+async function approveDeposit(userId, depositAmount) {
+    const userRef = db.collection('users').doc(userId);
+    try {
+        await userRef.update({
+            balance: firebase.firestore.FieldValue.increment(depositAmount)
         });
+        alert("Deposit Approved!");
+    } catch (error) {
+        alert("Action Failed: " + error.message);
     }
-});
+}
