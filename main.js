@@ -16,20 +16,22 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 2. Auth State Observer & Force Redirect (The Solution)
+// 2. Auth State Observer & Force Redirect (Updated for new filenames)
 auth.onAuthStateChanged(user => {
     const path = window.location.pathname;
-    const isAuthPage = path.includes('auth.html');
+    
+    // চেক করা হচ্ছে ইউজার কি ড্যাশবোর্ডে আছে কি না
+    const isDashboard = path.includes('dashboard.html');
 
     if (!user) {
-        // If not logged in and NOT on auth page, force go to auth.html
-        if (!isAuthPage) {
-            window.location.href = 'auth.html';
+        // যদি লগইন না থাকে এবং ড্যাশবোর্ড পেজে থাকে, তবে লগইন পেজে (index.html) পাঠাবে
+        if (isDashboard) {
+            window.location.href = 'index.html';
         }
     } else {
-        // If logged in and on auth page, go to dashboard
-        if (isAuthPage) {
-            window.location.href = 'index.html';
+        // যদি লগইন থাকে এবং বর্তমানে লগইন পেজে (index.html) থাকে, তবে ড্যাশবোর্ডে পাঠাবে
+        if (!isDashboard) {
+            window.location.href = 'dashboard.html';
         }
         loadDashboardData(user);
     }
@@ -40,10 +42,11 @@ const regForm = document.getElementById('registerForm');
 if(regForm) {
     regForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = regForm[0].value;
-        const email = regForm[1].value;
-        const password = regForm[2].value;
-        const refCode = regForm[3].value;
+        // ইনপুট ফিল্ড থেকে ডাটা নেওয়া
+        const name = regForm.querySelectorAll('input')[0].value;
+        const email = regForm.querySelectorAll('input')[1].value;
+        const password = regForm.querySelectorAll('input')[2].value;
+        const refCode = regForm.querySelectorAll('input')[3].value;
 
         auth.createUserWithEmailAndPassword(email, password).then(cred => {
             return db.collection('users').doc(cred.user.uid).set({
@@ -58,7 +61,7 @@ if(regForm) {
         }).then(() => {
             auth.signOut().then(() => {
                 alert("Account created successfully! Please log in.");
-                window.location.href = 'auth.html'; 
+                window.location.href = 'index.html'; 
             });
         }).catch(err => alert("Error: " + err.message));
     });
@@ -69,16 +72,16 @@ const loginForm = document.getElementById('loginForm');
 if(loginForm) {
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = loginForm[0].value;
-        const password = loginForm[1].value;
+        const email = loginForm.querySelectorAll('input')[0].value;
+        const password = loginForm.querySelectorAll('input')[1].value;
 
         auth.signInWithEmailAndPassword(email, password).then(() => {
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.html';
         }).catch(err => alert("Login Failed: " + err.message));
     });
 }
 
-// 5. Dashboard Data
+// 5. Dashboard Data Loading
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
         const data = doc.data();
@@ -89,6 +92,16 @@ function loadDashboardData(user) {
             if(document.getElementById('userName')) {
                 document.getElementById('userName').innerText = data.fullName;
             }
+            if(document.getElementById('userRefCode')) {
+                document.getElementById('userRefCode').value = data.email;
+            }
         }
     });
 }
+
+// 6. Logout Function (If you have a logout button)
+function logout() {
+    auth.signOut().then(() => {
+        window.location.href = 'index.html';
+    }).catch(err => alert(err.message));
+          }
