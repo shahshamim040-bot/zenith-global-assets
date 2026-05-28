@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Global | Institutional VIP Dashboard</title>
+    <title>Zenith Global | Institutional VIP Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         body { 
-            background: radial-gradient(circle at 50% 0%, #031e13 0%, #020617 80%);
-            color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow-x: hidden; 
+            background: radial-gradient(circle at 50% 0%, #021a10 0%, #020617 80%);
+            color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; 
         }
-        .glass-card { background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .vip-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 0 20px rgba(16, 185, 129, 0.05); }
-        .sidebar-link.active { background: rgba(16, 185, 129, 0.15); border-left: 4px solid #10b981; color: #10b981; }
+        .glass-card { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .vip-box { background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.7) 100%); border: 1px solid rgba(16, 185, 129, 0.15); transition: all 0.3s ease; }
+        .vip-box:hover { border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.15); transform: translateY(-2px); }
+        .sidebar-link.active { background: rgba(16, 185, 129, 0.12); border-left: 4px solid #10b981; color: #10b981; }
         .page-section { display: none; animation: fadeIn 0.4s ease-out forwards; }
         .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="min-h-screen bg-slate-950">
+<body class="min-h-screen">
 
     <div class="lg:hidden w-full bg-slate-950/90 border-b border-white/5 p-4 flex justify-between items-center fixed top-0 left-0 z-50 backdrop-blur-md">
         <div class="flex items-center space-x-2">
-            <img src="logo.png" alt="Zenith" class="h-8 w-8 object-contain rounded-full border border-emerald-500/30">
+            <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex Skinner items-center justify-center font-black text-xs text-slate-950">ZG</div>
             <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">Zenith VIP</h1>
         </div>
         <button onclick="toggleSidebar()" class="text-white text-xl p-2"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
@@ -34,8 +34,8 @@
 
     <aside id="sidebar" class="w-64 bg-slate-950/95 border-r border-white/5 flex flex-col justify-between fixed h-full z-50 transition-all duration-300 transform -translate-x-full lg:translate-x-0 pt-16 lg:pt-0">
         <div>
-            <div class="p-6 flex items-center space-x-3 border-b border-white/5 bg-slate-950">
-                <img src="logo.png" alt="Zenith" class="h-11 w-11 object-contain rounded-full border-2 border-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+            <div class="p-6 flex items-center space-x-3 border-b border-white/5">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-300 flex items-center justify-center font-black text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.3)]">Z</div>
                 <div>
                     <h1 class="text-sm font-black tracking-widest text-emerald-400 uppercase">Zenith Global</h1>
                     <p class="text-[9px] text-amber-400 uppercase tracking-widest font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP Terminal</p>
@@ -51,11 +51,11 @@
                 <button onclick="switchTab('withdraw')" id="nav-withdraw" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-money-bill-transfer text-base"></i> <span>Withdraw Funds</span>
                 </button>
+                <button onclick="switchTab('history')" id="nav-history" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-clock-history text-base"></i> <span>Audit Log / History</span>
+                </button>
                 <button onclick="toggleChat()" class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-emerald-400 transition">
                     <i class="fa-solid fa-comments text-base"></i> <span>Live Chat Support</span>
-                </button>
-                <button onclick="switchTab('help')" id="nav-help" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-circle-info text-base"></i> <span>Corporate Desk</span>
                 </button>
             </nav>
         </div>
@@ -71,12 +71,12 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
                 <h2 class="text-xl font-black text-white italic tracking-wide">WELCOME, <span id="userName" class="text-emerald-400 uppercase">VIP USER</span> <i class="fa-solid fa-circle-check text-xs text-blue-400 ml-1"></i></h2>
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">System Status: Quantum Encrypted Connection Active</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">System Status: Secure Node Core Active</p>
             </div>
             <div class="glass-card w-full md:w-auto px-4 py-2.5 rounded-2xl flex justify-between items-center space-x-3 border border-emerald-500/10">
                 <div class="text-left">
-                    <p class="text-[8px] text-amber-400 uppercase font-black tracking-wider"><i class="fa-solid fa-gift"></i> Invite & Earn $3.00 Instant</p>
-                    <p id="refLinkText" class="text-[10px] font-mono text-emerald-400">Loading Node Link...</p>
+                    <p class="text-[8px] text-amber-400 uppercase font-black tracking-wider"><i class="fa-solid fa-gift"></i> Invite Active Users & Get $3.00 Reward</p>
+                    <p id="refLinkText" class="text-[10px] font-mono text-emerald-400">Syncing Network Node...</p>
                 </div>
                 <button onclick="copyReferral()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 p-2 rounded-xl transition"><i class="fa-regular fa-copy"></i></button>
             </div>
@@ -88,180 +88,207 @@
                 <h3 class="text-xl font-black text-white italic">$<span id="userBalance">0.00</span></h3>
             </div>
             <div class="glass-card p-4 rounded-2xl border-l-4 border-blue-400 bg-blue-950/5">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Portfolio</p>
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Investments</p>
                 <h3 class="text-xl font-black text-white italic">$<span id="activeInvest">0.00</span></h3>
             </div>
             <div class="glass-card p-4 rounded-2xl border-l-4 border-amber-400 bg-amber-950/5">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Yield Profits</p>
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Earnings</p>
                 <h3 class="text-xl font-black text-white italic">$<span id="totalYield">0.00</span></h3>
             </div>
             <div class="glass-card p-4 rounded-2xl border-l-4 border-purple-400 bg-purple-950/5">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Nodes Deployed</p>
-                <h3 class="text-xl font-black text-white italic"><span id="purchasedCount">0</span> <span class="text-[9px] text-slate-500 uppercase font-normal">Nodes</span></h3>
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Running Nodes</p>
+                <h3 class="text-xl font-black text-white italic"><span id="purchasedCount">0</span></h3>
             </div>
         </div>
 
         <section id="sec-home" class="page-section active space-y-8">
             
-            <div class="glass-card p-5 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950">
-                <h3 class="text-xs font-black tracking-widest text-emerald-400 uppercase mb-4 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <i class="fa-solid fa-satellite-dish"></i> Live Active Nodes Deployed
-                </h3>
-                <div id="activeNodesList" class="space-y-3">
-                    <p class="text-xs text-slate-500 italic text-center py-6">No institutional investment nodes deployed yet.</p>
+            <div class="glass-card p-5 rounded-3xl overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <i class="fa-solid fa-chart-line"></i> Zenith Global Quant Algorithmic Feed
+                    </h3>
+                    <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">LIVE MATCHING</span>
                 </div>
+                <div id="chartContainer" class="w-full h-48 md:h-64 rounded-xl overflow-hidden bg-slate-950/40"></div>
             </div>
 
             <div class="space-y-4">
-                <div class="text-center md:text-left">
-                    <h3 class="text-sm font-black tracking-widest text-amber-400 uppercase flex items-center justify-center md:justify-start gap-2">
-                        <i class="fa-solid fa-crown text-xs"></i> Institutional High-Frequency VIP Tiers
-                    </h3>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Daily Accumulation Compound System Running (30% Daily Compound Yield Increment)</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
-                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">01</div>
-                        <div>
-                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 01</span><h4 class="text-sm font-black italic tracking-wide text-white">Alpha Quant Node</h4></div>
-                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$6.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
-                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                <h3 class="text-xs font-black tracking-widest text-amber-400 uppercase flex items-center gap-2"><i class="fa-solid fa-crown text-xs"></i> High-Frequency Yield Node Packages</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 01</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$6.00</p></div>
                         </div>
-                        <button onclick="buyPlan(6, 28, 'Alpha Quant Node')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Alpha Quant Node</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$56.40</span></p>
+                        </div>
+                        <button onclick="buyPlan(6, 28, 'Alpha Quant Node')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
                     </div>
 
-                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
-                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">02</div>
-                        <div>
-                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 02</span><h4 class="text-sm font-black italic tracking-wide text-white">Beta Liquidity Node</h4></div>
-                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$10.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
-                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 02</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$10.00</p></div>
                         </div>
-                        <button onclick="buyPlan(10, 28, 'Beta Liquidity Node')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Beta Liquidity Node</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$94.00</span></p>
+                        </div>
+                        <button onclick="buyPlan(10, 28, 'Beta Liquidity Node')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
                     </div>
 
-                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
-                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">03</div>
-                        <div>
-                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 03</span><h4 class="text-sm font-black italic tracking-wide text-white">Gamma Matrix Protocol</h4></div>
-                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$15.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
-                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 03</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$15.00</p></div>
                         </div>
-                        <button onclick="buyPlan(15, 28, 'Gamma Matrix Protocol')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Gamma Matrix Protocol</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$141.00</span></p>
+                        </div>
+                        <button onclick="buyPlan(15, 28, 'Gamma Matrix Protocol')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
                     </div>
 
-                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
-                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">04</div>
-                        <div>
-                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 04</span><h4 class="text-sm font-black italic tracking-wide text-white">Delta Core Arbitrage</h4></div>
-                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$30.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
-                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 04</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$30.00</p></div>
                         </div>
-                        <button onclick="buyPlan(30, 28, 'Delta Core Arbitrage')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Delta Core Arbitrage</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$282.00</span></p>
+                        </div>
+                        <button onclick="buyPlan(30, 28, 'Delta Core Arbitrage')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
                     </div>
+
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 05</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$50.00</p></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Epsilon Node Matrix</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$470.00</span></p>
+                        </div>
+                        <button onclick="buyPlan(50, 28, 'Epsilon Node Matrix')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
+                    </div>
+
+                    <div class="vip-box p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 06</span>
+                            <div class="text-right"><p class="text-[9px] text-slate-500 uppercase">Cost Plan</p><p class="text-sm font-black text-white">$100.00</p></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wide">Omega Quantum Prime</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Daily Yield: <span class="text-emerald-400 font-bold">+30%</span> | Term: <span class="text-white">28 Days</span></p>
+                            <p class="text-[10px] text-amber-400 font-bold mt-2"><i class="fa-solid fa-calculator"></i> Total Maturity Return: <span class="text-white">$940.00</span></p>
+                        </div>
+                        <button onclick="buyPlan(100, 28, 'Omega Quantum Prime')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2.5 rounded-xl uppercase tracking-wider transition">Deploy Node</button>
+                    </div>
+
                 </div>
             </div>
 
             <div class="glass-card p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-4 bg-slate-950/60 mt-12">
-                <div class="flex items-center space-x-3 border-b border-white/5 pb-4">
+                <div class="flex Skinner items-center space-x-3 border-b border-white/5 pb-4">
                     <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 text-lg"><i class="fa-solid fa-building-shield"></i></div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase tracking-wider text-white">About Zenith Global Asset Management</h4>
-                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Global Framework Regulatory Overview</p>
-                    </div>
+                    <div><h4 class="text-sm font-black uppercase tracking-wider text-white">Zenith Global Asset Management Inc.</h4><p class="text-[9px] text-slate-500 uppercase tracking-widest">Global Framework Institutional Overview</p></div>
                 </div>
                 <div class="text-slate-400 text-xs leading-relaxed space-y-3 font-normal">
-                    <p>
-                        Zenith Global Asset Management Inc. is a premier, tier-one multinational financial ecosystem specializing in high-frequency algorithmic arbitrage, smart-contract equity staking, and decentralized liquidity node deployment. Headquartered in Midtown Manhattan, New York, with synchronized computational hardware clusters in London, Tokyo, and Riyadh, our system ensures uninterrupted capital yield processing on an institutional scale.
-                    </p>
-                    <p>
-                        By operating automated algorithmic protocols, Zenith Global mitigates structural financial market risks and generates a high-efficiency yield loop. Our quantitative terminal leverages state-of-the-art multi-layer ledger technologies, enabling global retail and institutional investors to lease dedicated mining and validation nodes. Every node operates under audited decentralized smart contracts, creating secure, high-yield digital portfolios with real-time settlement rails.
-                    </p>
-                </div>
-                <div class="grid grid-cols-3 gap-4 pt-4 text-center border-t border-white/5">
-                    <div><h5 class="text-base font-black text-emerald-400 italic">$2.4B+</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Assets Managed</p></div>
-                    <div><h5 class="text-base font-black text-blue-400 italic">99.98%</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Node Uptime</p></div>
-                    <div><h5 class="text-base font-black text-purple-400 italic">140+</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Supported Countries</p></div>
+                    <p>Zenith Global Asset Management Inc. is a leading multi-layer computational investment infrastructure firm specializing in high-frequency cryptographic arbitrage, algorithmic market-making, and liquidity pool configurations. Our ecosystem leverages decentralized automation to provide high-efficiency yield generation for global institutional markets and retail traders alike.</p>
+                    <p>Operating under distributed ledger execution frameworks, Zenith Global deploys institutional-grade processing nodes that run complex smart contracts securely. Every micro-transaction is monitored across multi-cluster verification setups, maintaining a reliable risk-mitigated portfolio setup with real-time settlement capabilities across international networks.</p>
                 </div>
             </div>
         </section>
 
         <section id="sec-deposit" class="page-section space-y-6 max-w-md mx-auto">
-            <h2 class="text-xl font-black uppercase italic text-emerald-400 tracking-wider text-center">Funding Desk</h2>
-            <div class="glass-card p-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 text-center text-[11px] text-orange-400">
-                <i class="fa-solid fa-circle-exclamation mr-1"></i> Exchange Settlement Lock: <strong>$1.00 USD = 127.00 BDT</strong>
+            <h2 class="text-lg font-black uppercase text-emerald-400 tracking-wider text-center">Funding Registry Desk</h2>
+            <div class="glass-card p-4 rounded-xl border border-orange-500/10 bg-orange-500/5 text-center text-[10px] text-orange-400">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Liquidation Locked Valuation: <strong>$1.00 USD = 127.00 BDT</strong>
             </div>
             
             <div class="space-y-4">
-                <div class="bg-slate-900/80 p-5 rounded-3xl border border-white/5">
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Amount to Deposit (USD)</p>
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-white/5">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Desired Allocation Value (USD)</p>
                     <input type="number" id="usdAmount" oninput="calculateExchange()" placeholder="0.00" class="w-full bg-transparent text-3xl font-black outline-none text-white italic">
-                    <p class="text-[10px] text-slate-400 mt-2 font-bold">Required Remittance: <span id="bdtValue" class="text-emerald-400">0.00</span> BDT</p>
+                    <p class="text-[10px] text-slate-400 mt-2 font-bold">Total Required Remittance: <span id="bdtValue" class="text-emerald-400">0.00</span> BDT</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <button onclick="openGateway('Bkash')" class="p-4 bg-slate-900 hover:bg-pink-950/20 rounded-2xl border border-white/5 flex items-center justify-center space-x-2 transition">
-                        <span class="w-2 h-2 rounded-full bg-pink-500"></span><span class="text-[11px] font-black uppercase text-slate-300">bKash</span>
+                        <span class="w-2 h-2 rounded-full bg-pink-500"></span><span class="text-[11px] font-black uppercase text-slate-300">bKash Agent</span>
                     </button>
                     <button onclick="openGateway('Nagad')" class="p-4 bg-slate-900 hover:bg-orange-950/20 rounded-2xl border border-white/5 flex items-center justify-center space-x-2 transition">
-                        <span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-[11px] font-black uppercase text-slate-300">Nagad</span>
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-[11px] font-black uppercase text-slate-300">Nagad Agent</span>
                     </button>
                 </div>
 
                 <div id="paymentBox" class="hidden space-y-4 pt-4 border-t border-white/5">
-                    <div class="p-5 bg-slate-950 rounded-2xl border border-emerald-500/20 text-center">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Official Agent <span id="gatewayTitle"></span> Number (Cashout Only)</p>
-                        <h2 id="adminNumber" class="text-xl font-black text-emerald-400 tracking-widest mt-1">LOADING...</h2>
+                    <div class="p-4 bg-slate-950 rounded-xl border border-emerald-500/10 text-center">
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest"><span id="gatewayTitle"></span> Operational Terminal Account Number</p>
+                        <h2 id="adminNumber" class="text-lg font-black text-emerald-400 tracking-widest mt-1">FETCHING ACTIVE GATEWAY...</h2>
                     </div>
 
                     <div class="space-y-3">
-                        <input type="text" id="senderNum" placeholder="Sender Mobile Number *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 text-white" required>
-                        <input type="text" id="trxId" placeholder="Transaction ID (TrxID) *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 text-white" required>
+                        <input type="text" id="senderNum" placeholder="Sender Account Number *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white" required>
+                        <input type="text" id="trxId" placeholder="Transaction Structure ID (TrxID) *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white" required>
                         
                         <div class="p-4 bg-slate-900 rounded-xl border border-white/5">
-                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2">Upload Remittance Receipt Screenshot *</p>
+                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2">Upload Transfer Confirmation Screen Capture *</p>
                             <input type="file" id="screenshot" accept="image/*" class="text-[10px] text-slate-400 file:bg-emerald-600 file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-white file:font-bold" required>
                         </div>
 
-                        <button id="submitBtn" onclick="submitDeposit()" class="w-full bg-emerald-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest transition shadow-lg text-slate-950">Commit Settlement Request</button>
+                        <button id="submitBtn" onclick="submitDeposit()" class="w-full bg-emerald-600 py-3.5 rounded-xl font-black uppercase text-xs tracking-widest text-slate-950 shadow-lg">Commit Settlement Packet</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="sec-withdraw" class="page-section max-w-sm mx-auto text-center space-y-5">
-            <h2 class="text-xl font-black uppercase italic text-blue-400 tracking-wider">Asset Disinvestment Desk</h2>
-            <div class="glass-card p-6 rounded-3xl space-y-4 text-left">
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest text-center">Minimum Liquidation Threshold: <strong class="text-white">$20.00 USD</strong></p>
+        <section id="sec-withdraw" class="page-section max-w-sm mx-auto space-y-5">
+            <h2 class="text-lg font-black uppercase text-blue-400 tracking-wider text-center">Liquidation Processing Desk</h2>
+            <div class="glass-card p-5 rounded-2xl space-y-4">
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest text-center">Minimum Asset Threshold: <strong class="text-white">$20.00 USD</strong></p>
                 <div class="space-y-3">
-                    <input type="number" id="withdrawAmount" placeholder="Amount (USD)" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white">
+                    <input type="number" id="withdrawAmount" placeholder="Liquidation Amount (USD) *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white">
                     <select id="withdrawGateway" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-slate-400">
-                        <option value="bkash">bKash (Personal)</option>
-                        <option value="nagad">Nagad (Personal)</option>
+                        <option value="bkash">bKash (Personal Account)</option>
+                        <option value="nagad">Nagad (Personal Account)</option>
                     </select>
-                    <input type="text" id="withdrawAccount" placeholder="Receiving Mobile Number" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white">
+                    <input type="text" id="withdrawAccount" placeholder="Receiving Terminal Number *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none text-white">
                 </div>
-                <button onclick="processWithdrawal()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest text-white shadow-lg">Request Payout</button>
+                <button onclick="processWithdrawal()" class="w-full bg-blue-600 py-3.5 rounded-xl font-black uppercase text-xs tracking-widest text-white shadow-lg">Deploy Disinvestment Pipeline</button>
             </div>
         </section>
 
-        <section id="sec-help" class="page-section max-w-lg mx-auto space-y-6">
-            <h2 class="text-xl font-black uppercase text-slate-300 tracking-wider text-center">Global Security & Operations</h2>
-            <div class="glass-card p-6 rounded-3xl space-y-4">
-                <div class="border-b border-white/5 pb-4">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Corporate Headquarters</h4>
-                    <p class="text-sm font-black text-white">Zenith Global Asset Management Inc.</p>
-                    <p class="text-xs text-slate-400 mt-1 font-mono">Suite 450, 200 Park Avenue, Midtown Manhattan,<br>New York, NY 10166, United States.</p>
-                </div>
-                <div class="border-b border-white/5 pb-4">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Official Communications Infrastructure</h4>
-                    <a href="mailto:zenithglobal@gmail.com" class="text-sm font-black text-emerald-400 font-mono hover:underline">zenithglobal@gmail.com</a>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Operational Protocol</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Yield generation algorithms are deployed automatically across international nodes every 24 hours. For technical anomalies or enterprise compliance issues, contact support infrastructure immediately.</p>
+        <section id="sec-history" class="page-section space-y-6">
+            <h2 class="text-lg font-black uppercase text-purple-400 tracking-wider text-center">Operational Audit Node History</h2>
+            <div class="glass-card p-5 rounded-3xl overflow-hidden bg-slate-950/40">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-white/5 text-slate-500 font-bold uppercase text-[9px] tracking-wider">
+                                <th class="p-3">Reference ID / Type</th>
+                                <th class="p-3">Value Amount</th>
+                                <th class="p-3">Target Router Info</th>
+                                <th class="p-3 text-center">Log Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyLogTable">
+                            <tr>
+                                <td colspan="4" class="p-6 text-center text-slate-500 italic">No historical operational logs recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -270,25 +297,16 @@
 
     <div id="chat-window" class="fixed bottom-6 right-6 w-80 h-96 glass-card rounded-2xl shadow-2xl z-50 flex flex-col hidden overflow-hidden border border-emerald-500/20">
         <div class="bg-emerald-950/80 p-4 border-b border-white/5 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-black uppercase tracking-wider text-white">Live Node Chat</span>
-            </div>
+            <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-xs font-black uppercase text-white">Live Operations Terminal</span></div>
             <button onclick="toggleChat()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-2 text-xs text-slate-300">
-            <div class="bg-slate-900/80 p-3 rounded-xl border border-white/5 max-w-[85%]">
-                Hello! Welcome to Support. How can we assist you today?
-            </div>
-        </div>
+        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-2 text-xs text-slate-300"></div>
         <div class="p-3 border-t border-white/5 bg-slate-950 flex gap-2">
-            <input type="text" id="chat-input" placeholder="Type secure message..." class="flex-1 bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 text-white">
+            <input type="text" id="chat-input" placeholder="Transmit secure frame..." class="flex-1 bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 text-white">
             <button onclick="sendLiveChatMessage()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-slate-950 font-black transition"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
-    <button onclick="toggleChat()" class="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black p-4 rounded-full shadow-2xl z-40 transition-all active:scale-95">
-        <i class="fa-solid fa-comments text-xl"></i>
-    </button>
+    <button onclick="toggleChat()" class="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-emerald-400 hover:bg-emerald-300 text-slate-950 p-4 rounded-full shadow-2xl z-40 transition-all active:scale-95"><i class="fa-solid fa-comments text-xl"></i></button>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -321,10 +339,39 @@
             document.getElementById('bdtValue').innerText = (usd * 127).toFixed(2);
         }
 
-        function toggleChat() {
-            const chat = document.getElementById('chat-window');
-            chat.classList.toggle('hidden');
+        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
+
+        // AUTOMATED LIVE MARKET TRADING GRAPH DRIVER
+        const container = document.getElementById('chartContainer');
+        const chart = LightweightCharts.createChart(container, {
+            layout: { backgroundColor: 'transparent', textColor: '#64748b', fontSize: 10 },
+            grid: { vertLines: { color: 'rgba(255,255,255,0.01)' }, horzLines: { color: 'rgba(255,255,255,0.01)' } },
+            rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal }
+        });
+        const areaSeries = chart.addAreaSeries({ topColor: 'rgba(16, 185, 129, 0.2)', bottomColor: 'rgba(16, 185, 129, 0.0)', lineColor: '#10b981', lineWidth: 2 });
+        
+        let chartData = [];
+        let baseTime = Math.floor(Date.now() / 1000) - 100 * 60;
+        let baseValue = 2640.50;
+        for (let i = 0; i < 100; i++) {
+            baseValue += (Math.random() - 0.48) * 12;
+            chartData.push({ time: baseTime + i * 60, value: baseValue });
         }
+        areaSeries.setData(chartData);
+
+        setInterval(() => {
+            const lastItem = chartData[chartData.length - 1];
+            const nextTime = lastItem.time + 60;
+            const nextValue = lastItem.value + (Math.random() - 0.48) * 14;
+            const updateObj = { time: nextTime, value: nextValue };
+            areaSeries.update(updateObj);
+            chartData.push(updateObj);
+            if(chartData.length > 150) chartData.shift();
+        }, 3000);
+
+        window.addEventListener('resize', () => { chart.resize(container.clientWidth, container.clientHeight); });
+        setTimeout(() => { chart.resize(container.clientWidth, container.clientHeight); }, 1000);
     </script>
 </body>
 </html>
