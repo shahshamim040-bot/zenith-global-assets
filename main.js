@@ -1,4 +1,4 @@
-// ১. Firebase Config (১:১ আপনার স্ক্রিনশট থেকে মিলিয়ে ফিক্স করা)
+// ১. Firebase Config (আপনার অরিজিনাল স্ক্রিনশট মিলিয়ে ১০০% ফিক্সড)
 const firebaseConfig = {
     apiKey: "AIzaSyC4k_mvbX_KY7dtSUkjiE0a11xgu8KqVkY",
     authDomain: "zenith-global-assets.firebaseapp.com",
@@ -8,6 +8,7 @@ const firebaseConfig = {
     appId: "1:818320822478:web:ddd1e8f247bc3d81dfc09f",
     measurementId: "G-ZNGB5YV218"
 };
+
 
 // ফায়ারবেস ইনিশিয়ালাইজেশন
 if (!firebase.apps.length) {
