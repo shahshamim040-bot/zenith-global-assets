@@ -1,4 +1,4 @@
-// ১. Firebase Config (Collected from your repo in "21625.jpg")
+// ১. Firebase Config (Collected from your repo)
 const firebaseConfig = {
     apiKey: "AIzaSyC4k_mvbX_KY7dtSUkjiE0a11xgu8KqVkY",
     authDomain: "zenith-global-assets.firebaseapp.com",
@@ -19,7 +19,7 @@ const db = firebase.firestore();
 let currentUser = null;
 let activeGateway = "";
 
-// বিকাশ ও নগদ গেটওয়ে অ্যাকাউন্ট নাম্বার (প্রয়োজন অনুযায়ী পরিবর্তন করতে পারবেন)
+// বিকাশ ও নগদ অফিশিয়াল এজেন্ট নাম্বার
 const gatewayNumbers = {
     Bkash: "017XXXXXXXX (bKash Agent)",
     Nagad: "019XXXXXXXX (Nagad Agent)"
@@ -37,11 +37,12 @@ auth.onAuthStateChanged(user => {
         if (!isDashboard) { 
             window.location.href = 'dashboard.html'; 
         } else {
-            // ড্যাশবোর্ডে থাকলে ডাটা ও হিস্ট্রি লোড হবে
+            // ড্যাশবোর্ডে থাকলে ডাটা, অটো-প্রফিট রান ও হিস্ট্রি লোড হবে
             loadDashboardData(user);
+            processDailyYields(user);
             listenToHistoryLog();
             
-            // অটোমেটিক রেফারেল লিংক জেনারেট
+            // ইউজারের একাউন্ট অনুযায়ী ডায়নামিক রেফারেল লিংক জেনারেট
             const currentDomain = window.location.origin;
             if(document.getElementById('refLinkText')) {
                 document.getElementById('refLinkText').innerText = `${currentDomain}/register.html?ref=${user.uid}`;
@@ -62,22 +63,32 @@ if (loginForm) {
     });
 }
 
-// ৪. Registration Logic
+// ৪. Registration Logic + Referral Bonus Check
 const regForm = document.getElementById('registerForm');
 if(regForm) {
     regForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const inputs = regForm.querySelectorAll('input');
+        const refUID = inputs[3].value.trim() || "none";
+
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
+            // নতুন ইউজারের ৩টি আলাদা ব্যালেন্সসহ ডকুমেন্ট তৈরি
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
-                balance: 0.00,
-                activeInvestment: 0.00,
-                totalYield: 0.00,
+                balance: 0.00,          // মেইন ব্যালেন্স (ডিপোজিট ও রেফারের টাকা)
+                earningBalance: 0.00,   // আর্নিং ব্যালেন্স (দৈনিক প্রফিট)
+                activeInvestment: 0.00, // একটিভ ইনভেস্টমেন্ট বা স্টেক
                 purchasedCount: 0,
-                refBy: inputs[3].value || "none",
+                refBy: refUID,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                // রেফারেল কোড থাকলে রেফারার বা আমন্ত্রণকারীর মেইন ব্যালেন্সে $3.00 ডলার অটো অ্যাড হবে
+                if (refUID !== "none") {
+                    return db.collection('users').doc(refUID).update({
+                        balance: firebase.firestore.FieldValue.increment(3.00)
+                    }).catch(err => console.log("Referral crediting skipped:", err));
+                }
             });
         }).then(() => {
             auth.signOut().then(() => {
@@ -88,21 +99,65 @@ if(regForm) {
     });
 }
 
-// ৫. Load Data (Real-time Sync for Dashboard)
+// ৫. Load Data (Real-time 3-Balance Sync for Dashboard)
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
         const data = doc.data();
         if(data) {
             if(document.getElementById('userBalance')) document.getElementById('userBalance').innerText = parseFloat(data.balance || 0).toFixed(2);
+            if(document.getElementById('earningBalance')) document.getElementById('earningBalance').innerText = parseFloat(data.earningBalance || 0).toFixed(2);
             if(document.getElementById('userName')) document.getElementById('userName').innerText = data.fullName || "VIP User";
             if(document.getElementById('activeInvest')) document.getElementById('activeInvest').innerText = parseFloat(data.activeInvestment || 0).toFixed(2);
-            if(document.getElementById('totalYield')) document.getElementById('totalYield').innerText = parseFloat(data.totalYield || 0).toFixed(2);
             if(document.getElementById('purchasedCount')) document.getElementById('purchasedCount').innerText = data.purchasedCount || 0;
         }
     });
 }
 
-// ৬. Referral Link Copy Function
+// ৬. ২৪ ঘণ্টা পর পর অটোমেটিক দৈনিক লাভ (Daily Yield) অ্যাড করার প্রসেস
+function processDailyYields(user) {
+    const now = new Date().getTime();
+    
+    db.collection("active_nodes")
+    .where("userId", "==", user.uid)
+    .where("status", "==", "Active")
+    .get()
+    .then(snapshot => {
+        snapshot.forEach(doc => {
+            const node = doc.data();
+            const lastClaim = node.lastClaimTime ? node.lastClaimTime.toDate().getTime() : node.timestamp.toDate().getTime();
+            
+            // ২৪ ঘণ্টা (৮৬৪০০০০০ মিলিমেকেন্ড) পার হয়েছে কিনা চেক
+            if (now - lastClaim >= 86400000) {
+                const daysPassed = Math.floor((now - lastClaim) / 86400000);
+                
+                if (daysPassed > 0) {
+                    const totalEarned = node.dailyProfitAmount * daysPassed;
+                    
+                    // ১. ইউজারের ইয়ার্নিং ব্যালেন্সে প্রফিট যোগ হবে
+                    db.collection("users").doc(user.uid).update({
+                        earningBalance: firebase.firestore.FieldValue.increment(totalEarned)
+                    });
+
+                    // ২. একটিভ নোডের লাস্ট ক্লেম টাইম আপডেট
+                    db.collection("active_nodes").doc(doc.id).update({
+                        lastClaimTime: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // ৩. হিস্ট্রিতে প্রফিট জমার নোটিফিকেশন লগ
+                    db.collection("transactions").add({
+                        userId: user.uid,
+                        amount: totalEarned,
+                        type: "Daily Yield",
+                        status: "Success",
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }
+        });
+    });
+}
+
+// ৭. Referral Link Copy Function
 function copyReferral() {
     const linkText = document.getElementById('refLinkText').innerText;
     navigator.clipboard.writeText(linkText).then(() => {
@@ -110,7 +165,7 @@ function copyReferral() {
     });
 }
 
-// ৭. Professional Deposit Gateway with Mandatory Inputs
+// ৮. Deposit Gateway Action & Mandatory Inputs Validation
 function openGateway(gateway) {
     activeGateway = gateway;
     document.getElementById('gatewayTitle').innerText = gateway;
@@ -124,7 +179,7 @@ function submitDeposit() {
     const trxId = document.getElementById('trxId').value.trim();
     const screenshotFile = document.getElementById('screenshot').files[0];
 
-    // কঠোর ভ্যালিডেশন চেক (স্কিনসট, নাম্বার ও ট্রানজেকশন আইডি না দিলে সাবমিট হবে না)
+    // কঠোর ভ্যালিডেশন চেক (নাম্বার, আইডি ও স্ক্রিনশট না দিলে সাবমিট হবে না)
     if (!usdAmount || usdAmount <= 0) { return alert("Please specify a valid Allocation Value (USD)."); }
     if (!senderNum) { return alert("Sender Account Number is mandatory."); }
     if (!trxId) { return alert("Transaction Structure ID (TrxID) is mandatory."); }
@@ -146,7 +201,7 @@ function submitDeposit() {
         senderNumber: senderNum,
         transactionId: trxId,
         screenshotName: screenshotName,
-        status: "Pending", // এডমিন প্যানেল এপ্রুভ করার জন্য পেন্ডিং থাকবে
+        status: "Pending", // এডমিন প্যানেল থেকে এপ্রুভ করার জন্য পেন্ডিং থাকবে
         type: "Deposit",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
@@ -163,21 +218,34 @@ function submitDeposit() {
     .catch(error => alert("Transmission Error: " + error.message))
     .finally(() => {
         btn.disabled = false;
-        btn.innerText = "Commit Settlement Packet";
+        btn.innerText = "Submit Deposit Request";
     });
 }
 
-// ৮. Withdrawal Desk with Minimum $20 Limit & Error
+// ৯. Withdrawal Handling with Choice Source & Minimum $20 Limit
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const gateway = document.getElementById('withdrawGateway').value;
     const account = document.getElementById('withdrawAccount').value.trim();
-    const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
+    const source = document.getElementById('withdrawSource').value; 
+    
+    // ব্যালেন্স এলিমেন্ট আইডি চেক
+    const balanceId = (source === "earning") ? 'earningBalance' : 'userBalance';
+    const currentBalance = parseFloat(document.getElementById(balanceId).innerText);
 
-    // ২০ ডলারের কম হলে ইরোর দেখাবে
-    if (!amount || amount < 20) { return alert("Error: Minimum asset threshold for disinvestment is $20.00 USD."); }
-    if (!account) { return alert("Receiving Terminal Number cannot be left blank."); }
-    if (amount > currentBalance) { return alert("Error: Insufficient capital matrix in available balance."); }
+    // ২০ ডলারের কম হলে ইনস্ট্যান্ট ইরোর এলার্ট
+    if (!amount || amount < 20) { 
+        alert("Error: Minimum asset threshold for disinvestment is $20.00 USD."); 
+        return; 
+    }
+    if (!account) { 
+        alert("Receiving Terminal Number cannot be left blank."); 
+        return; 
+    }
+    if (amount > currentBalance) { 
+        alert(`Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`); 
+        return; 
+    }
 
     const withdrawPayload = {
         userId: currentUser.uid,
@@ -185,16 +253,18 @@ function processWithdrawal() {
         amount: amount,
         gateway: gateway.toUpperCase(),
         accountNumber: account,
-        status: "Pending", // এডমিন এপ্রুভ করার আগে পেন্ডিং থাকবে
+        sourceAccount: source, 
+        status: "Pending", // সাবমিট করলে হিস্ট্রিতে Pending দেখাবে
         type: "Withdrawal",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
+    // ফায়ারস্টোরে ট্রানজেকশন লক করা এবং ইউজারের সিলেক্টেড অ্যাকাউন্ট থেকে টাকা কেটে রাখা
     db.collection("transactions").add(withdrawPayload)
     .then(() => {
-        return db.collection("users").doc(currentUser.uid).update({
-            balance: firebase.firestore.FieldValue.increment(-amount)
-        });
+        let updateField = {};
+        updateField[source === "earning" ? "earningBalance" : "balance"] = firebase.firestore.FieldValue.increment(-amount);
+        return db.collection("users").doc(currentUser.uid).update(updateField);
     })
     .then(() => {
         alert("Disinvestment Pipeline Deployed! Liquidation processing is currently Pending.");
@@ -204,47 +274,61 @@ function processWithdrawal() {
     .catch(error => alert("Liquidation Interruption: " + error.message));
 }
 
-// ৯. Deploy Node Packages (30% Daily Interest Counter Matrix)
-function buyPlan(cost, days, planName) {
+// ১০. Deploy Node Packages (লোভনীয় মুক্ত রিয়েলস্টিক প্রফিট লজিক)
+function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
 
+    // মেইন ব্যালেন্সে টাকা না থাকলে রিডাইরেক্ট করে ডিপোজিটে পাঠাবে
     if (currentBalance < cost) {
-        alert("Insufficient Node Deployment Capital. Please fund your balance desk first.");
+        alert("Insufficient Node Deployment Capital. Please fund your main balance desk first.");
         switchTab('deposit');
         return;
     }
 
     if (confirm(`Confirm deployment of ${planName} for $${cost.toFixed(2)} USD?`)) {
-        // ৩০% হারে মেয়াদ শেষ হওয়ার পর কতো পাবে তা অটো ক্যালকুলেট
-        const dailyProfit = cost * 0.30;
+        const dailyProfit = cost * rate;
         const totalMaturityReturn = cost + (dailyProfit * days);
 
-        const planPayload = {
+        // ১. একটিভ নোড ট্র্যাকিং ডাটাবেজ (অটো প্রফিট হিসাব রাখার জন্য)
+        const nodePayload = {
+            userId: currentUser.uid,
+            planName: planName,
+            cost: cost,
+            dailyProfitAmount: dailyProfit,
+            status: "Active",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // ২. ট্রানজেকশন লগ ডাটাবেজ
+        const txnPayload = {
             userId: currentUser.uid,
             planName: planName,
             cost: cost,
             runtimeDays: days,
-            dailyYieldRate: "30%",
             maturityReturn: totalMaturityReturn,
-            status: "Success", // প্ল্যান পারচেজ সাথে সাথেই সাকসেসফুল ট্র্যাকিং হবে
+            status: "Success",
             type: "Plan Purchase",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        db.collection("transactions").add(planPayload)
+        db.collection("active_nodes").add(nodePayload)
         .then(() => {
+            return db.collection("transactions").add(txnPayload);
+        })
+        .then(() => {
+            // ইউজারের মেইন ব্যালেন্স থেকে টাকা কাটা এবং একটিভ ইনভেস্টমেন্টে যোগ করা
             return db.collection("users").doc(currentUser.uid).update({
                 balance: firebase.firestore.FieldValue.increment(-cost),
                 activeInvestment: firebase.firestore.FieldValue.increment(cost),
                 purchasedCount: firebase.firestore.FieldValue.increment(1)
             });
         })
-        .then(() => alert(`${planName} Deployed Successfully! Processing daily computational clusters.`))
+        .then(() => alert(`${planName} Deployed Successfully! Computational node is now running.`))
         .catch(error => alert("Deployment Aborted: " + error.message));
     }
 }
 
-// ১০. Audit Log / Sidebar History Sync (Pending / Approved / Success)
+// ১১. Real-Time Audit Log History Synchronization
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
@@ -264,7 +348,7 @@ function listenToHistoryLog() {
             const log = doc.data();
             let statusBadge = "";
 
-            // এডমিন ড্যাশবোর্ড থেকে স্ট্যাটাস পরিবর্তন করলে অটোমেটিক এখানেও রিয়েল-টাইমে চেঞ্জ হবে
+            // লাইভ স্ট্যাটাস ব্যাজ কালার কনফিগারেশন
             if (log.status === "Pending") {
                 statusBadge = `<span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] uppercase animate-pulse">Pending</span>`;
             } else if (log.status === "Approved" || log.status === "Success") {
@@ -277,6 +361,7 @@ function listenToHistoryLog() {
             if (log.type === "Deposit") targetRouter = `${log.gateway} (${log.senderNumber})`;
             else if (log.type === "Withdrawal") targetRouter = `${log.gateway} (${log.accountNumber})`;
             else if (log.type === "Plan Purchase") targetRouter = `Term: ${log.runtimeDays} Days`;
+            else if (log.type === "Daily Yield") targetRouter = `Automated Cluster Return`;
 
             const row = `
                 <tr class="border-b border-white/5 hover:bg-white/[0.02] transition">
@@ -296,22 +381,7 @@ function listenToHistoryLog() {
     });
 }
 
-// ১১. Logout Function
+// ১২. Logout Function
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
-}
-
-// ১২. Live Operational Chat Terminal
-function sendLiveChatMessage() {
-    const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if(!msg) return;
-    const chatContainer = document.getElementById('chat-messages');
-    chatContainer.innerHTML += `<div class="text-right"><span class="bg-emerald-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl inline-block my-1 max-w-[80%]">${msg}</span></div>`;
-    input.value = "";
-    setTimeout(() => {
-        chatContainer.innerHTML += `<div class="text-left"><span class="bg-slate-900 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl inline-block my-1 max-w-[80%]">Secure Handshake Complete. Node Operator will review this log sequence shortly.</span></div>`;
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 1000);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
