@@ -3,51 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Global | Institutional Dashboard</title>
+    <title>Zenith Global | Institutional VIP Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
-            background: radial-gradient(circle at 50% 0%, #062d1d 0%, #020617 70%);
+            background: radial-gradient(circle at 50% 0%, #031e13 0%, #020617 80%);
             color: white; 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             overflow-x: hidden; 
         }
-        .glass-card { background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.04); }
-        .sidebar-link.active { background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; color: #10b981; }
+        .glass-card { background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .vip-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 0 20px rgba(16, 185, 129, 0.05); }
+        .sidebar-link.active { background: rgba(16, 185, 129, 0.15); border-left: 4px solid #10b981; color: #10b981; }
         .page-section { display: none; animation: fadeIn 0.4s ease-out forwards; }
         .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen bg-slate-950">
 
     <div class="lg:hidden w-full bg-slate-950/90 border-b border-white/5 p-4 flex justify-between items-center fixed top-0 left-0 z-50 backdrop-blur-md">
         <div class="flex items-center space-x-2">
-            <img src="logo.png" alt="Zenith" class="h-7 w-7 object-contain">
-            <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">Zenith Global</h1>
+            <img src="logo.png" alt="Zenith" class="h-8 w-8 object-contain rounded-full border border-emerald-500/30">
+            <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">Zenith VIP</h1>
         </div>
-        <button onclick="toggleSidebar()" class="text-white text-xl p-2 focus:outline-none">
-            <i class="fa-solid fa-bars" id="menu-icon"></i>
-        </button>
+        <button onclick="toggleSidebar()" class="text-white text-xl p-2"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
     </div>
 
     <aside id="sidebar" class="w-64 bg-slate-950/95 border-r border-white/5 flex flex-col justify-between fixed h-full z-50 transition-all duration-300 transform -translate-x-full lg:translate-x-0 pt-16 lg:pt-0">
         <div>
-            <div class="hidden lg:p-6 lg:flex items-center space-x-3 border-b border-white/5">
-                <img src="logo.png" alt="Zenith" class="h-9 w-9 object-contain drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+            <div class="p-6 flex items-center space-x-3 border-b border-white/5 bg-slate-950">
+                <img src="logo.png" alt="Zenith" class="h-11 w-11 object-contain rounded-full border-2 border-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]">
                 <div>
                     <h1 class="text-sm font-black tracking-widest text-emerald-400 uppercase">Zenith Global</h1>
-                    <p class="text-[9px] text-slate-500 uppercase tracking-wider">Asset Management</p>
+                    <p class="text-[9px] text-amber-400 uppercase tracking-widest font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP Terminal</p>
                 </div>
             </div>
             <nav class="mt-6 px-4 space-y-1">
                 <button onclick="switchTab('home')" id="nav-home" class="sidebar-link active w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-chart-pie text-base"></i> <span>Institutional Node</span>
-                </button>
-                <button onclick="switchTab('plans')" id="nav-plans" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-layer-group text-base"></i> <span>Investment Plans</span>
+                    <i class="fa-solid fa-chart-pie text-base"></i> <span>VIP Portfolio Hub</span>
                 </button>
                 <button onclick="switchTab('deposit')" id="nav-deposit" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-wallet text-base"></i> <span>Deposit Assets</span>
@@ -59,7 +55,7 @@
                     <i class="fa-solid fa-comments text-base"></i> <span>Live Chat Support</span>
                 </button>
                 <button onclick="switchTab('help')" id="nav-help" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-circle-info text-base"></i> <span>Global Help Center</span>
+                    <i class="fa-solid fa-circle-info text-base"></i> <span>Corporate Desk</span>
                 </button>
             </nav>
         </div>
@@ -74,84 +70,120 @@
         
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-                <h2 class="text-xl font-black text-white italic">WELCOME, <span id="userName" class="text-emerald-400 uppercase">USER</span></h2>
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Node Status: Secure Connection Operational</p>
+                <h2 class="text-xl font-black text-white italic tracking-wide">WELCOME, <span id="userName" class="text-emerald-400 uppercase">VIP USER</span> <i class="fa-solid fa-circle-check text-xs text-blue-400 ml-1"></i></h2>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">System Status: Quantum Encrypted Connection Active</p>
             </div>
             <div class="glass-card w-full md:w-auto px-4 py-2.5 rounded-2xl flex justify-between items-center space-x-3 border border-emerald-500/10">
                 <div class="text-left">
-                    <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Your Referral Link</p>
-                    <p id="refLinkText" class="text-[10px] font-mono text-emerald-400">Loading...</p>
+                    <p class="text-[8px] text-amber-400 uppercase font-black tracking-wider"><i class="fa-solid fa-gift"></i> Invite & Earn $3.00 Instant</p>
+                    <p id="refLinkText" class="text-[10px] font-mono text-emerald-400">Loading Node Link...</p>
                 </div>
                 <button onclick="copyReferral()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 p-2 rounded-xl transition"><i class="fa-regular fa-copy"></i></button>
             </div>
         </header>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500 bg-emerald-950/10">
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-400 bg-emerald-950/5">
                 <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Available Balance</p>
                 <h3 class="text-xl font-black text-white italic">$<span id="userBalance">0.00</span></h3>
             </div>
-            <div class="glass-card p-4 rounded-2xl border-l-4 border-blue-500 bg-blue-950/10">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Investment</p>
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-blue-400 bg-blue-950/5">
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Portfolio</p>
                 <h3 class="text-xl font-black text-white italic">$<span id="activeInvest">0.00</span></h3>
             </div>
-            <div class="glass-card p-4 rounded-2xl border-l-4 border-purple-500 bg-purple-950/10">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Yield Earnings</p>
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-amber-400 bg-amber-950/5">
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Yield Profits</p>
                 <h3 class="text-xl font-black text-white italic">$<span id="totalYield">0.00</span></h3>
             </div>
-            <div class="glass-card p-4 rounded-2xl border-l-4 border-orange-500 bg-orange-950/10">
-                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Nodes</p>
-                <h3 class="text-xl font-black text-white italic"><span id="purchasedCount">0</span> <span class="text-[10px] text-slate-500 uppercase font-normal">Plans</span></h3>
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-purple-400 bg-purple-950/5">
+                <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Nodes Deployed</p>
+                <h3 class="text-xl font-black text-white italic"><span id="purchasedCount">0</span> <span class="text-[9px] text-slate-500 uppercase font-normal">Nodes</span></h3>
             </div>
         </div>
 
-        <section id="sec-home" class="page-section active space-y-6">
-            <div class="glass-card p-6 rounded-[2rem] bg-gradient-to-r from-slate-900/80 to-emerald-950/20">
-                <h3 class="text-xs font-black tracking-widest text-emerald-400 uppercase mb-4"><i class="fa-solid fa-circle-nodes mr-2"></i>Your Active Portfolio Assets</h3>
+        <section id="sec-home" class="page-section active space-y-8">
+            
+            <div class="glass-card p-5 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950">
+                <h3 class="text-xs font-black tracking-widest text-emerald-400 uppercase mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <i class="fa-solid fa-satellite-dish"></i> Live Active Nodes Deployed
+                </h3>
                 <div id="activeNodesList" class="space-y-3">
                     <p class="text-xs text-slate-500 italic text-center py-6">No institutional investment nodes deployed yet.</p>
                 </div>
             </div>
-        </section>
 
-        <section id="sec-plans" class="page-section space-y-6 max-w-2xl mx-auto">
-            <div class="text-center mb-4">
-                <h2 class="text-xl font-black uppercase text-emerald-400 tracking-wider">Institutional Investment Tiers</h2>
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest">Select a smart contract below to begin automated staking</p>
+            <div class="space-y-4">
+                <div class="text-center md:text-left">
+                    <h3 class="text-sm font-black tracking-widest text-amber-400 uppercase flex items-center justify-center md:justify-start gap-2">
+                        <i class="fa-solid fa-crown text-xs"></i> Institutional High-Frequency VIP Tiers
+                    </h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Daily Accumulation Compound System Running (30% Daily Compound Yield Increment)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">01</div>
+                        <div>
+                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 01</span><h4 class="text-sm font-black italic tracking-wide text-white">Alpha Quant Node</h4></div>
+                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$6.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
+                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                        </div>
+                        <button onclick="buyPlan(6, 28, 'Alpha Quant Node')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                    </div>
+
+                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">02</div>
+                        <div>
+                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 02</span><h4 class="text-sm font-black italic tracking-wide text-white">Beta Liquidity Node</h4></div>
+                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$10.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
+                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                        </div>
+                        <button onclick="buyPlan(10, 28, 'Beta Liquidity Node')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                    </div>
+
+                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">03</div>
+                        <div>
+                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 03</span><h4 class="text-sm font-black italic tracking-wide text-white">Gamma Matrix Protocol</h4></div>
+                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$15.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
+                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                        </div>
+                        <button onclick="buyPlan(15, 28, 'Gamma Matrix Protocol')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                    </div>
+
+                    <div class="vip-card p-5 rounded-2xl flex justify-between items-center relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 text-emerald-500/5 text-7xl font-black italic select-none">04</div>
+                        <div>
+                            <div class="flex items-center space-x-2"><span class="bg-emerald-400 text-slate-950 font-extrabold text-[8px] px-2 py-0.5 rounded-md uppercase">VIP 04</span><h4 class="text-sm font-black italic tracking-wide text-white">Delta Core Arbitrage</h4></div>
+                            <p class="text-[10px] text-slate-400 mt-1">Cost Structure: <span class="text-white font-bold">$30.00</span> | Runtime: <span class="text-white font-bold">28 Days</span></p>
+                            <p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> Yield Rate: +30% Daily Base Increment</p>
+                        </div>
+                        <button onclick="buyPlan(30, 28, 'Delta Core Arbitrage')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl italic transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">Deploy Node</button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="space-y-4" id="tierContainer">
-                <div class="glass-card p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-500/20 transition">
+
+            <div class="glass-card p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-4 bg-slate-950/60 mt-12">
+                <div class="flex items-center space-x-3 border-b border-white/5 pb-4">
+                    <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 text-lg"><i class="fa-solid fa-building-shield"></i></div>
                     <div>
-                        <div class="flex items-center space-x-2"><span class="bg-emerald-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase">Tier 01</span><h4 class="text-sm font-black italic">Alpha Yield Strategy</h4></div>
-                        <p class="text-[10px] text-slate-400 mt-1">Cost: <span class="text-white font-bold">$6.00</span> | Duration: <span class="text-white font-bold">28 Days</span></p>
-                        <p class="text-[10px] text-emerald-400 font-bold">Total Estimated ROI: $7.80 (30% Profit Contract)</p>
+                        <h4 class="text-sm font-black uppercase tracking-wider text-white">About Zenith Global Asset Management</h4>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Global Framework Regulatory Overview</p>
                     </div>
-                    <button onclick="buyPlan(6, 7.80, 28, 'Alpha Yield Strategy')" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl italic transition">Deploy $6.00</button>
                 </div>
-                <div class="glass-card p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-500/20 transition">
-                    <div>
-                        <div class="flex items-center space-x-2"><span class="bg-emerald-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase">Tier 02</span><h4 class="text-sm font-black italic">Beta Liquidity Node</h4></div>
-                        <p class="text-[10px] text-slate-400 mt-1">Cost: <span class="text-white font-bold">$10.00</span> | Duration: <span class="text-white font-bold">28 Days</span></p>
-                        <p class="text-[10px] text-emerald-400 font-bold">Total Estimated ROI: $13.00 (30% Profit Contract)</p>
-                    </div>
-                    <button onclick="buyPlan(10, 13.00, 28, 'Beta Liquidity Node')" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl italic transition">Deploy $10.00</button>
+                <div class="text-slate-400 text-xs leading-relaxed space-y-3 font-normal">
+                    <p>
+                        Zenith Global Asset Management Inc. is a premier, tier-one multinational financial ecosystem specializing in high-frequency algorithmic arbitrage, smart-contract equity staking, and decentralized liquidity node deployment. Headquartered in Midtown Manhattan, New York, with synchronized computational hardware clusters in London, Tokyo, and Riyadh, our system ensures uninterrupted capital yield processing on an institutional scale.
+                    </p>
+                    <p>
+                        By operating automated algorithmic protocols, Zenith Global mitigates structural financial market risks and generates a high-efficiency yield loop. Our quantitative terminal leverages state-of-the-art multi-layer ledger technologies, enabling global retail and institutional investors to lease dedicated mining and validation nodes. Every node operates under audited decentralized smart contracts, creating secure, high-yield digital portfolios with real-time settlement rails.
+                    </p>
                 </div>
-                <div class="glass-card p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-500/20 transition">
-                    <div>
-                        <div class="flex items-center space-x-2"><span class="bg-emerald-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase">Tier 03</span><h4 class="text-sm font-black italic">Gamma Matrix Protocol</h4></div>
-                        <p class="text-[10px] text-slate-400 mt-1">Cost: <span class="text-white font-bold">$15.00</span> | Duration: <span class="text-white font-bold">28 Days</span></p>
-                        <p class="text-[10px] text-emerald-400 font-bold">Total Estimated ROI: $19.50 (30% Profit Contract)</p>
-                    </div>
-                    <button onclick="buyPlan(15, 19.50, 28, 'Gamma Matrix Protocol')" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl italic transition">Deploy $15.00</button>
-                </div>
-                <div class="glass-card p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-500/20 transition">
-                    <div>
-                        <div class="flex items-center space-x-2"><span class="bg-emerald-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase">Tier 04</span><h4 class="text-sm font-black italic">Delta Core Arbitrage</h4></div>
-                        <p class="text-[10px] text-slate-400 mt-1">Cost: <span class="text-white font-bold">$30.00</span> | Duration: <span class="text-white font-bold">28 Days</span></p>
-                        <p class="text-[10px] text-emerald-400 font-bold">Total Estimated ROI: $39.00 (30% Profit Contract)</p>
-                    </div>
-                    <button onclick="buyPlan(30, 39.00, 28, 'Delta Core Arbitrage')" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2.5 rounded-xl italic transition">Deploy $30.00</button>
+                <div class="grid grid-cols-3 gap-4 pt-4 text-center border-t border-white/5">
+                    <div><h5 class="text-base font-black text-emerald-400 italic">$2.4B+</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Assets Managed</p></div>
+                    <div><h5 class="text-base font-black text-blue-400 italic">99.98%</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Node Uptime</p></div>
+                    <div><h5 class="text-base font-black text-purple-400 italic">140+</h5><p class="text-[8px] text-slate-500 uppercase tracking-wider">Supported Countries</p></div>
                 </div>
             </div>
         </section>
@@ -159,12 +191,12 @@
         <section id="sec-deposit" class="page-section space-y-6 max-w-md mx-auto">
             <h2 class="text-xl font-black uppercase italic text-emerald-400 tracking-wider text-center">Funding Desk</h2>
             <div class="glass-card p-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 text-center text-[11px] text-orange-400">
-                <i class="fa-solid fa-circle-exclamation mr-1"></i> Institutional Exchange Rate Locked: <strong>$1.00 USD = 127.00 BDT</strong>
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Exchange Settlement Lock: <strong>$1.00 USD = 127.00 BDT</strong>
             </div>
             
             <div class="space-y-4">
                 <div class="bg-slate-900/80 p-5 rounded-3xl border border-white/5">
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Amount to Buy (USD)</p>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Amount to Deposit (USD)</p>
                     <input type="number" id="usdAmount" oninput="calculateExchange()" placeholder="0.00" class="w-full bg-transparent text-3xl font-black outline-none text-white italic">
                     <p class="text-[10px] text-slate-400 mt-2 font-bold">Required Remittance: <span id="bdtValue" class="text-emerald-400">0.00</span> BDT</p>
                 </div>
@@ -185,15 +217,15 @@
                     </div>
 
                     <div class="space-y-3">
-                        <input type="text" id="senderNum" placeholder="Sender Mobile Number" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
-                        <input type="text" id="trxId" placeholder="Transaction ID (TrxID)" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                        <input type="text" id="senderNum" placeholder="Sender Mobile Number *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 text-white" required>
+                        <input type="text" id="trxId" placeholder="Transaction ID (TrxID) *" class="w-full bg-slate-900 border border-white/5 p-4 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 text-white" required>
                         
                         <div class="p-4 bg-slate-900 rounded-xl border border-white/5">
-                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2">Upload Remittance Receipt Screenshot</p>
-                            <input type="file" id="screenshot" accept="image/*" class="text-[10px] text-slate-400 file:bg-emerald-600 file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-white file:font-bold">
+                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2">Upload Remittance Receipt Screenshot *</p>
+                            <input type="file" id="screenshot" accept="image/*" class="text-[10px] text-slate-400 file:bg-emerald-600 file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-white file:font-bold" required>
                         </div>
 
-                        <button id="submitBtn" onclick="submitDeposit()" class="w-full bg-emerald-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest transition shadow-lg">Commit Settlement Request</button>
+                        <button id="submitBtn" onclick="submitDeposit()" class="w-full bg-emerald-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest transition shadow-lg text-slate-950">Commit Settlement Request</button>
                     </div>
                 </div>
             </div>
@@ -251,10 +283,10 @@
         </div>
         <div class="p-3 border-t border-white/5 bg-slate-950 flex gap-2">
             <input type="text" id="chat-input" placeholder="Type secure message..." class="flex-1 bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 text-white">
-            <button onclick="sendLiveChatMessage()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-white transition"><i class="fa-solid fa-paper-plane"></i></button>
+            <button onclick="sendLiveChatMessage()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-xl text-slate-950 font-black transition"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
-    <button onclick="toggleChat()" class="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black p-4 rounded-full shadow-2xl z-40 transition-all active:scale-95">
+    <button onclick="toggleChat()" class="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black p-4 rounded-full shadow-2xl z-40 transition-all active:scale-95">
         <i class="fa-solid fa-comments text-xl"></i>
     </button>
 
@@ -262,6 +294,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="main.js"></script>
+    
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -280,7 +313,6 @@
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             document.getElementById('sec-' + id).classList.add('active');
             if(document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
-            
             if (window.innerWidth < 1024) { toggleSidebar(); }
         }
 
@@ -293,74 +325,6 @@
             const chat = document.getElementById('chat-window');
             chat.classList.toggle('hidden');
         }
-
-        // AUTO-BUY PLAN FUNCTIONALITY LINKED WITH MAIN.JS
-        async function buyPlan(cost, roi, duration, planName) {
-            const user = firebase.auth().currentUser;
-            if(!user) return alert("Session expired. Please log in again.");
-
-            const userRef = firebase.firestore().collection('users').doc(user.uid);
-            
-            try {
-                const doc = await userRef.get();
-                if(!doc.exists) return alert("User configuration data not found.");
-                
-                const currentBalance = doc.data().balance || 0;
-                
-                if(currentBalance < cost) {
-                    alert("🚫 Transaction Declined: Insufficient Funds in Node Balance.");
-                    return;
-                }
-                
-                // Automatic deduct and setup contract
-                await userRef.update({
-                    balance: currentBalance - cost,
-                    activeInvest: (doc.data().activeInvest || 0) + cost,
-                    purchasedCount: (doc.data().purchasedCount || 0) + 1
-                });
-                
-                // Push investment log to subcollection
-                await userRef.collection('investments').add({
-                    planName: planName,
-                    cost: cost,
-                    roi: roi,
-                    duration: duration,
-                    activatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: "Active"
-                });
-
-                alert(`🎯 Success! Automated smart contract deployed: ${planName}`);
-                if(typeof loadDashboardData === "function") loadDashboardData(user);
-                
-            } catch (err) {
-                alert("Smart Contract Execution Error: " + err.message);
-            }
-        }
-
-        // Live Chat to Admin Telegram
-        async function sendLiveChatMessage() {
-            const msgInput = document.getElementById('chat-input');
-            const message = msgInput.value.trim();
-            if(!message) return;
-
-            const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML += `<div class="bg-emerald-600/20 p-3 rounded-xl border border-emerald-500/10 max-w-[85%] ml-auto text-right text-emerald-400">${message}</div>`;
-            msgInput.value = "";
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Forward to admin bot (Using variables from main.js)
-            if(typeof botToken !== 'undefined' && typeof chatId !== 'undefined') {
-                const userName = document.getElementById('userName').innerText;
-                const caption = `💬 **NEW LIVE CHAT MESSAGE**\n\n👤 User: ${userName}\n💬 Message: ${message}`;
-                try {
-                    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: "Markdown" })
-                    });
-                } catch(e) {}
-            }
-        }
     </script>
 </body>
-                    </html>
+</html>
