@@ -1,4 +1,4 @@
-// ১. Firebase Config (Collected from your repo)
+// ১. Firebase Config (১:১ আপনার স্ক্রিনশট থেকে মিলিয়ে ফিক্স করা)
 const firebaseConfig = {
     apiKey: "AIzaSyC4k_mvbX_KY7dtSUkjiE0a11xgu8KqVkY",
     authDomain: "zenith-global-assets.firebaseapp.com",
@@ -274,7 +274,7 @@ function processWithdrawal() {
     .catch(error => alert("Liquidation Interruption: " + error.message));
 }
 
-// ১০. Deploy Node Packages (লোভনীয় মুক্ত রিয়েলস্টিক প্রফিট লজিক)
+// ১০. Deploy Node Packages (বাস্তবধর্মী প্রফিট লজিক)
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
 
