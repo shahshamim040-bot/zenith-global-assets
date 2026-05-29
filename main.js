@@ -1,4 +1,4 @@
-// ১. Firebase Config (আপনার অরিজিনাল স্ক্রিনশট মিলিয়ে ১০০% ফিক্সড)
+// ১. Firebase Config (আপনার অরিজিনাল ক্লাউড কনসোল ও স্ক্রিনশট মিলিয়ে ১০০% ফিক্সড)
 const firebaseConfig = {
     apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjIE0s11xgu8KqVkY", 
     authDomain: "zenith-global-assets.firebaseapp.com",
@@ -8,7 +8,6 @@ const firebaseConfig = {
     appId: "1:818320822478:web:ddd1e8f247bc3d81dfc09f",
     measurementId: "G-ZNGB5YV218"
 };
-
 
 // ফায়ারবেস ইনিশিয়ালাইজেশন
 if (!firebase.apps.length) {
@@ -87,14 +86,14 @@ if(regForm) {
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
-                balance: 0.00,          // মেইন ব্যালেন্স (ডিপোজিট ও রেফারের টাকা)
+                balance: 0.00,          // মেইন ব্যালেন্স
                 earningBalance: 0.00,   // আর্নিং ব্যালেন্স (দৈনিক প্রফিট)
-                activeInvestment: 0.00, // একটিভ ইনভেস্টমেন্ট বা স্টেক
+                activeInvestment: 0.00, // একটিভ ইনভেস্টমেন্ট
                 purchasedCount: 0,
                 refBy: refUID,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                // রেফারেল কোড থাকলে রেফারার বা আমন্ত্রণকারীর মেইন ব্যালেন্সে $3.00 ডলার অটো অ্যাড হবে
+                // রেফারেল কোড থাকলে আমন্ত্রণকারীর মেইন ব্যালেন্সে $3.00 ডলার অটো অ্যাড হবে
                 if (refUID !== "none") {
                     return db.collection('users').doc(refUID).update({
                         balance: firebase.firestore.FieldValue.increment(3.00)
@@ -156,24 +155,20 @@ function processDailyYields(user) {
             const node = doc.data();
             const lastClaim = node.lastClaimTime ? node.lastClaimTime.toDate().getTime() : node.timestamp.toDate().getTime();
             
-            // ২৪ ঘণ্টা (৮৬৪০০০০০ মিলিমেকেন্ড) পার হয়েছে কিনা চেক
             if (now - lastClaim >= 86400000) {
                 const daysPassed = Math.floor((now - lastClaim) / 86400000);
                 
                 if (daysPassed > 0) {
                     const totalEarned = node.dailyProfitAmount * daysPassed;
                     
-                    // ১. ইউজারের ইয়ার্নিং ব্যালেন্সে প্রফিট যোগ হবে
                     db.collection("users").doc(user.uid).update({
                         earningBalance: firebase.firestore.FieldValue.increment(totalEarned)
                     });
 
-                    // ২. একটিভ নোডের লাস্ট ক্লেম টাইম আপডেট
                     db.collection("active_nodes").doc(doc.id).update({
                         lastClaimTime: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    // ৩. হিস্ট্রিতে প্রফিট জমার নোটিফিকেশন লগ
                     db.collection("transactions").add({
                         userId: user.uid,
                         amount: totalEarned,
@@ -187,7 +182,7 @@ function processDailyYields(user) {
     });
 }
 
-// ৭. Referral Link Copy Function
+// ७. Referral Link Copy Function
 function copyReferral() {
     const linkText = document.getElementById('refLinkText').innerText;
     navigator.clipboard.writeText(linkText).then(() => {
@@ -203,7 +198,7 @@ function copyReferral() {
     });
 }
 
-// ৮. Deposit Gateway Action & Mandatory Inputs Validation
+// ৮. Deposit Gateway Action & Mandatory Inputs Validation (পেন্ডিং লজিকসহ)
 function openGateway(gateway) {
     activeGateway = gateway;
     document.getElementById('gatewayTitle').innerText = gateway;
@@ -217,53 +212,20 @@ function submitDeposit() {
     const trxId = document.getElementById('trxId').value.trim();
     const screenshotFile = document.getElementById('screenshot').files[0];
 
-    // কঠোর ভ্যালিডেশন চেক (SweetAlert2 ডার্ক থিম দ্বারা কাস্টমাইজড)
     if (!usdAmount || usdAmount <= 0) { 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Input',
-            text: 'Please specify a valid Allocation Value (USD).',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Understand'
-        });
+        Swal.fire({ icon: 'warning', title: 'Invalid Input', text: 'Please specify a valid Allocation Value (USD).', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
         return; 
     }
     if (!senderNum) { 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Number',
-            text: 'Sender Account Number is mandatory.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'warning', title: 'Missing Number', text: 'Sender Account Number is mandatory.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
         return; 
     }
     if (!trxId) { 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing TrxID',
-            text: 'Transaction Structure ID (TrxID) is mandatory.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'warning', title: 'Missing TrxID', text: 'Transaction Structure ID (TrxID) is mandatory.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
         return; 
     }
     if (!screenshotFile) { 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Screenshot Required',
-            text: 'You must upload a Transfer Confirmation Screen Capture.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'warning', title: 'Screenshot Required', text: 'You must upload a Transfer Confirmation Screen Capture.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
         return; 
     }
 
@@ -273,6 +235,7 @@ function submitDeposit() {
 
     const screenshotName = `${Date.now()}_${screenshotFile.name}`;
 
+    // ডিফল্ট স্ট্যাটাস "Pending" থাকবে, যা এডমিন প্যানেল থেকে এপ্রুভ করার সাথে সাথে লাইভ সাক্সেস শো করবে
     const depositPayload = {
         userId: currentUser.uid,
         userEmail: currentUser.email,
@@ -291,13 +254,12 @@ function submitDeposit() {
     db.collection("transactions").add(depositPayload)
     .then(() => {
         Swal.fire({
-            icon: 'success',
+            icon: 'warning',
             title: 'Deposit Committed',
             text: 'Deposit Packet Committed Successfully! Awaiting Admin Node Verification.',
             background: '#020617',
             color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Great'
+            confirmButtonColor: '#10b981'
         });
         document.getElementById('usdAmount').value = "";
         document.getElementById('senderNum').value = "";
@@ -306,15 +268,7 @@ function submitDeposit() {
         document.getElementById('paymentBox').classList.add('hidden');
     })
     .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Transmission Error',
-            text: error.message,
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'error', title: 'Transmission Error', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
     })
     .finally(() => {
         btn.disabled = false;
@@ -322,55 +276,30 @@ function submitDeposit() {
     });
 }
 
-// ৯. Withdrawal Handling with Choice Source & Minimum $20 Limit
+// ৯. Withdrawal Handling (পেন্ডিং ও অটো ব্যালেন্স ডিডাকশন)
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const gateway = document.getElementById('withdrawGateway').value;
     const account = document.getElementById('withdrawAccount').value.trim();
     const source = document.getElementById('withdrawSource').value; 
     
-    // ব্যালেন্স এলিমেন্ট আইডি চেক
     const balanceId = (source === "earning") ? 'earningBalance' : 'userBalance';
     const currentBalance = parseFloat(document.getElementById(balanceId).innerText);
 
-    // ২০ ডলারের কম হলে ইনস্ট্যান্ট ইরোর এলার্ট
     if (!amount || amount < 20) { 
-        Swal.fire({
-            icon: 'error',
-            title: 'Limit Restriction',
-            text: 'Error: Minimum asset threshold for disinvestment is $20.00 USD.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'error', title: 'Limit Restriction', text: 'Error: Minimum asset threshold for disinvestment is $20.00 USD.', background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
         return; 
     }
     if (!account) { 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Blank Terminal',
-            text: 'Receiving Terminal Number cannot be left blank.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'warning', title: 'Blank Terminal', text: 'Receiving Terminal Number cannot be left blank.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
         return; 
     }
     if (amount > currentBalance) { 
-        Swal.fire({
-            icon: 'error',
-            title: 'Insufficient Balance',
-            text: `Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`,
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'error', title: 'Insufficient Balance', text: `Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
         return; 
     }
 
+    // উইথড্র সাবমিট করলেই স্ট্যাটাস "Pending" হিসেবে ডাটাবেজে লক হবে
     const withdrawPayload = {
         userId: currentUser.uid,
         userEmail: currentUser.email,
@@ -391,35 +320,25 @@ function processWithdrawal() {
     })
     .then(() => {
         Swal.fire({
-            icon: 'success',
+            icon: 'warning',
             title: 'Pipeline Deployed',
             text: 'Disinvestment Pipeline Deployed! Liquidation processing is currently Pending.',
             background: '#020617',
             color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Done'
+            confirmButtonColor: '#10b981'
         });
         document.getElementById('withdrawAmount').value = "";
         document.getElementById('withdrawAccount').value = "";
     })
     .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Liquidation Interruption',
-            text: error.message,
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'error', title: 'Liquidation Interruption', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
     });
 }
 
-// ১০. Deploy Node Packages (বাস্তবধর্মী প্রফিট লজিক)
+// ১০. Deploy Node Packages (ডাবল-কনফার্মেশন ও সাক্সেস লগো মেসেজ)
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
 
-    // মেইন ব্যালেন্সে টাকা না থাকলে রিডাইরেক্ট করে ডিপোজিটে পাঠাবে
     if (currentBalance < cost) {
         Swal.fire({
             icon: 'error',
@@ -435,7 +354,7 @@ function buyPlan(cost, days, rate, planName) {
         return;
     }
 
-    // ব্রাউজার কনফার্মেশনের জায়গায় প্রিমিয়াম ডার্ক সুইটঅ্যালার্ট কনফার্ম বক্স
+    // প্ল্যান কিনার আগের ইন্টারক্টিভ কনফার্মেশন ডায়ালগ
     Swal.fire({
         title: 'Confirm Deployment',
         text: `Confirm deployment of ${planName} for $${cost.toFixed(2)} USD?`,
@@ -484,32 +403,24 @@ function buyPlan(cost, days, rate, planName) {
                 });
             })
             .then(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Deployed Successfully',
-                    text: `${planName} Deployed Successfully! Computational node is now running.`,
-                    background: '#020617',
-                    color: '#fff',
-                    confirmButtonColor: '#10b981',
-                    confirmButtonText: 'Excellent'
+                // সাক্সেসফুলি কেনা হয়ে গেলে সুন্দর অ্যানিমেটেড সবুজ টিকমার্ক মেসেজ
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: 'Deployed Successfully', 
+                    text: `${planName} Deployed Successfully! Computational node is now running.`, 
+                    background: '#020617', 
+                    color: '#fff', 
+                    confirmButtonColor: '#10b981' 
                 });
             })
             .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Deployment Aborted',
-                    text: error.message,
-                    background: '#020617',
-                    color: '#fff',
-                    confirmButtonColor: '#ef4444',
-                    confirmButtonText: 'OK'
-                });
+                Swal.fire({ icon: 'error', title: 'Deployment Aborted', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
             });
         }
     });
 }
 
-// ১১. Real-Time Audit Log History Synchronization
+// ১১. Real-Time Audit Log History Synchronization (লাইভ স্ট্যাটাস ব্যাজ ডিজাইন)
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
@@ -529,6 +440,7 @@ function listenToHistoryLog() {
             const log = doc.data();
             let statusBadge = "";
 
+            // পেন্ডিং থাকলে হলুদ অ্যানিমেটেড পালস এবং এডমিন এপ্রুভ করলে অটোমেটিক সবুজ সাক্সেস লগো শো হবে
             if (log.status === "Pending") {
                 statusBadge = `<span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] uppercase animate-pulse">Pending</span>`;
             } else if (log.status === "Approved" || log.status === "Success") {
@@ -564,4 +476,4 @@ function listenToHistoryLog() {
 // ১২. Logout Function
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
-                                                                                   }
+                  }
