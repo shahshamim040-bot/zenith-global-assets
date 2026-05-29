@@ -175,13 +175,10 @@ function processDailyYields(user) {
             const node = doc.data();
             const lastClaim = node.lastClaimTime ? node.lastClaimTime.toDate().getTime() : node.timestamp.toDate().getTime();
             if (now - lastClaim >= 86400000) {
-                const daysPassed = Math.floor((now - lastClaim) / 86400000);
-                if (daysPassed > 0) {
-                    const totalEarned = node.dailyProfitAmount * daysPassed;
-                    db.collection("users").doc(user.uid).update({ earningBalance: firebase.firestore.FieldValue.increment(totalEarned) });
-                    db.collection("active_nodes").doc(doc.id).update({ lastClaimTime: firebase.firestore.FieldValue.serverTimestamp() });
-                    db.collection("transactions").add({ userId: user.uid, type: "Daily Profit", amount: totalEarned, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                }
+                const totalEarned = node.dailyProfitAmount;
+                db.collection("users").doc(user.uid).update({ earningBalance: firebase.firestore.FieldValue.increment(totalEarned) });
+                db.collection("active_nodes").doc(doc.id).update({ lastClaimTime: firebase.firestore.FieldValue.serverTimestamp() });
+                db.collection("transactions").add({ userId: user.uid, type: "Daily Profit", amount: totalEarned, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
             }
         });
     });
@@ -212,10 +209,23 @@ function submitDeposit() {
     const senderNum = document.getElementById('senderNum').value.trim();
     const trxId = document.getElementById('trxId').value.trim();
 
-    if (!usdAmount || usdAmount <= 0 || !trxId) { 
-        CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Please fill all fields!' });
+    // ভ্যালিডেশন
+    if (!usdAmount || usdAmount <= 0 || !senderNum || !trxId) { 
+        CustomSwal.fire({ icon: 'error', title: 'Error', text: 'All fields required!' });
         return; 
     }
+
+    // এডমিন এর কাছে পাঠানোর লজিক
+    db.collection("deposit_requests").add({
+        userId: currentUser.uid,
+        userName: document.getElementById('userName').innerText,
+        amount: usdAmount,
+        gateway: activeGateway,
+        senderNum: senderNum,
+        trxId: trxId,
+        status: "Pending",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
     db.collection("transactions").add({
         userId: currentUser.uid,
@@ -224,7 +234,7 @@ function submitDeposit() {
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Node Verification.' });
+        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Approval.' });
         document.getElementById('paymentBox').classList.add('hidden');
     });
 }
@@ -238,9 +248,21 @@ function processWithdrawal() {
     const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
     const currentBal = parseFloat(document.getElementById('userBalance').innerText);
     
+    // ভ্যালিডেশন
     if (amount < 20) { CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Min withdrawal $20!' }); return; }
     if (!account) { CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Account number is required!' }); return; }
     if (amount > currentBal) { CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'Insufficient balance!' }); return; }
+
+    // এডমিন এর কাছে পাঠানোর লজিক
+    db.collection("withdraw_requests").add({
+        userId: currentUser.uid,
+        userName: document.getElementById('userName').innerText,
+        amount: amount,
+        account: account,
+        gateway: gateway,
+        status: "Pending",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
     db.collection("transactions").add({
         userId: currentUser.uid,
@@ -297,12 +319,10 @@ function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
 
-    // হিস্ট্রি ফিক্স করার জন্য আমরা orderBy সরিয়ে snapshot লজিক ব্যবহার করছি
     db.collection("transactions")
         .where("userId", "==", currentUser.uid)
         .onSnapshot(snapshot => {
             tableBody.innerHTML = ""; 
-            // ক্লায়েন্ট সাইডে সর্ট করে হিস্ট্রি দেখাবো
             const docs = snapshot.docs.sort((a,b) => b.data().timestamp - a.data().timestamp);
             docs.forEach(doc => {
                 const log = doc.data();
