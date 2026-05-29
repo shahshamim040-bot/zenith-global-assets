@@ -2,159 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Terminal & Executive Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zenith Mobile Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* স্মুথ স্ক্রোলিং ও গ্লিচ রিমুভাল */
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen selection:bg-emerald-500/30 selection:text-white">
 
-    <div id="userDashboardView" class="block min-h-screen flex flex-col">
-        <header class="max-w-md mx-auto w-full p-4 flex justify-between items-center border-b border-white/5">
-            <div>
-                <h1 class="text-xl font-black text-emerald-400 uppercase tracking-wider">Zenith Terminal</h1>
-                <p class="text-[10px] text-slate-400 uppercase">Welcome to your Secure Node</p>
-            </div>
-            <div class="text-right">
-                <p class="text-[9px] text-slate-500 uppercase font-bold">Main Balance</p>
-                <h3 class="text-lg font-black text-emerald-400" id="userBalanceDisplay">$0.00</h3>
-            </div>
-        </header>
-
-        <main class="max-w-md mx-auto w-full p-4 flex-1 space-y-6">
-            <section class="space-y-4">
-                <h2 class="text-xs font-black uppercase text-emerald-400 tracking-wider text-center">Funding Registry Desk</h2>
-                <div class="bg-slate-900 border border-white/5 p-3 rounded-xl text-center text-[10px] text-orange-400">
-                    Rate Structure: <strong>$1.00 USD = 127.00 BDT</strong> (Minimum: $6.00)
+    <div id="adminAuthScreen" class="flex min-h-screen flex-col justify-center items-center p-6 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+        <div class="w-full max-w-sm space-y-6 text-center">
+            <div class="space-y-3">
+                <div class="w-20 h-20 mx-auto bg-slate-900 border border-white/10 rounded-2xl p-2 flex items-center justify-center shadow-2xl backdrop-blur-md">
+                    <img src="logo.png" alt="Zenith Logo" class="w-full h-full object-contain rounded-xl">
                 </div>
-                
-                <div class="space-y-3">
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-white/5">
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Desired Funding Amount (USD)</p>
-                        <input type="number" id="usdAmount" oninput="calculateExchange()" placeholder="0.00" min="6" class="w-full bg-transparent text-2xl font-black outline-none text-white italic">
-                        <p class="text-[10px] text-slate-400 mt-1">Total Required Remittance: <span id="totalBdtDisplay" class="text-emerald-400 font-bold">0.00</span> BDT</p>
-                    </div>
+                <div>
+                    <h2 class="text-xl font-black uppercase tracking-wider bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Zenith Executive</h2>
+                    <p class="text-[10px] text-emerald-400 font-mono uppercase tracking-widest mt-1">Mobile Access Terminal</p>
+                </div>
+            </div>
 
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="openGateway('Bkash')" class="p-3 bg-slate-900 hover:bg-pink-950/20 rounded-xl border border-white/5 flex items-center justify-center space-x-2 transition">
-                            <span class="w-2 h-2 rounded-full bg-pink-500"></span><span class="text-[10px] font-black text-slate-300">bKash</span>
-                        </button>
-                        <button type="button" onclick="openGateway('Nagad')" class="p-3 bg-slate-900 hover:bg-orange-950/20 rounded-xl border border-white/5 flex items-center justify-center space-x-2 transition">
-                            <span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-[10px] font-black text-slate-300">Nagad</span>
-                        </button>
-                    </div>
-
-                    <div id="paymentBox" class="hidden space-y-3 pt-3 border-t border-white/5">
-                        <div class="p-3 bg-slate-950 rounded-xl border border-emerald-500/10 text-center">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase"><span id="gatewayTitle"></span> Official Agent Number</p>
-                            <h2 id="adminNumber" class="text-sm font-black text-emerald-400 tracking-wider mt-0.5">---</h2>
+            <div class="bg-slate-900/80 border border-white/10 p-5 rounded-2xl shadow-2xl space-y-4 backdrop-blur-lg">
+                <div class="space-y-3 text-left">
+                    <div>
+                        <label class="block text-[9px] text-slate-400 uppercase font-black mb-1 tracking-wider">Terminal ID / Username</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-3 text-slate-500 text-xs"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="authAdminUser" class="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none focus:border-emerald-500 font-mono transition-all">
                         </div>
-
-                        <div class="space-y-2">
-                            <input type="text" id="senderNum" placeholder="Your Sender Account Number *" class="w-full bg-slate-900 border border-white/5 p-3 rounded-xl text-xs font-bold outline-none text-white">
-                            <input type="text" id="trxId" placeholder="Transaction ID (TrxID) *" class="w-full bg-slate-900 border border-white/5 p-3 rounded-xl text-xs font-bold outline-none text-white">
-                            
-                            <button onclick="submitDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-black uppercase text-xs text-slate-950 shadow-lg transition">Submit Deposit Request</button>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-slate-400 uppercase font-black mb-1 tracking-wider">Access Passkey</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-3 text-slate-500 text-xs"><i class="fa-solid fa-key"></i></span>
+                            <input type="password" id="authAdminPass" class="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none focus:border-emerald-500 font-mono transition-all">
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
-
-        <footer class="p-4 text-right max-w-md mx-auto w-full">
-            <button onclick="triggerAdminLoginPrompt()" class="text-[10px] text-slate-600 hover:text-emerald-400 uppercase font-mono tracking-wider transition">
-                <i class="fa-solid fa-lock mr-1"></i> Admin Console
-            </button>
-        </footer>
-    </div>
-
-
-    <div id="adminLoginPopup" class="hidden fixed inset-0 bg-slate-950/95 flex items-center justify-center z-[9999] p-4">
-        <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-sm shadow-2xl space-y-4 text-center">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-xl mx-auto mb-2">Z</div>
-                <h2 class="text-base font-black uppercase tracking-wider text-white">Admin Authentication</h2>
-                <p class="text-[10px] text-slate-400 uppercase">Secure Mobile Gateway</p>
+                <button onclick="processAdminAuthentication()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-slate-950 py-3 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg active:scale-[0.98] transition-all">
+                    Unlock Core Node
+                </button>
             </div>
-            <div class="space-y-3 text-left">
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Username</label>
-                    <input type="text" id="adminUser" placeholder="shamim040" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Password</label>
-                    <input type="password" id="adminPass" placeholder="12345" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="closeAdminLoginPrompt()" class="w-full bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold uppercase">Cancel</button>
-                <button onclick="checkAdminLogin()" class="w-full bg-emerald-600 text-slate-950 py-2.5 rounded-xl text-xs font-black uppercase">Access</button>
-            </div>
+            <p class="text-[9px] text-slate-600 font-mono">Protected by End-to-End Control Infrastructure</p>
         </div>
     </div>
 
 
-    <div id="adminDashboardView" class="hidden min-h-screen flex flex-col flex-1">
-        <header class="bg-slate-900 border-b border-white/10 p-4 sticky top-0 z-40 flex justify-between items-center shadow-lg">
-            <div>
-                <h1 class="text-sm font-black uppercase text-white tracking-wide">Zenith Core Executive</h1>
-                <p class="text-[9px] text-emerald-400 font-mono">Terminal Node: shamim040 (All-in-One Page)</p>
+    <div id="adminMainDashboard" class="hidden min-h-screen flex flex-col">
+        <header class="bg-slate-900/90 border-b border-white/10 p-3 sticky top-0 z-50 flex justify-between items-center shadow-lg backdrop-blur-md">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 bg-slate-950 border border-white/10 p-1 rounded-lg">
+                    <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-xs font-black uppercase text-white tracking-wide flex items-center gap-1.5">
+                        Zenith Control
+                    </h1>
+                    <p class="text-[8px] text-emerald-400 font-mono" id="activeNodeDisplay">Node: shamim040</p>
+                </div>
             </div>
-            <button onclick="adminLogout()" class="text-xs bg-red-950/40 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">
-                Exit Terminal
+            <button onclick="terminateAdminSession()" class="text-[10px] bg-red-950/40 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-xl font-black uppercase tracking-wider active:bg-red-900/40 transition">
+                Logout
             </button>
         </header>
 
-        <main class="p-4 max-w-md mx-auto w-full space-y-8 pb-24">
-            
-            <section class="space-y-3 bg-slate-900 border border-white/10 rounded-2xl p-4 shadow-xl">
-                <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider border-b border-white/5 pb-2">
-                    <i class="fa-solid fa-sliders mr-1"></i> Gateway Parameters (নম্বর পরিবর্তন)
+        <main class="p-4 max-w-md mx-auto w-full space-y-6 pb-24">
+
+            <section class="bg-slate-900 border border-white/5 rounded-xl p-4 shadow-xl space-y-3.5">
+                <h3 class="text-[11px] font-black text-emerald-400 uppercase tracking-wider border-b border-white/5 pb-1.5">
+                    <i class="fa-solid fa-money-bill-wave mr-1"></i> Gateway Numbers (নম্বর পরিবর্তন)
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2.5">
                     <div>
-                        <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">bKash Agent Number</label>
-                        <input type="text" id="bkashNum" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono focus:border-emerald-500">
+                        <label class="block text-[8px] text-slate-400 uppercase font-bold mb-1">bKash Agent Number</label>
+                        <input type="text" id="dbBkashNum" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-500">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Nagad Agent Number</label>
-                        <input type="text" id="nagadNum" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono focus:border-emerald-500">
+                        <label class="block text-[8px] text-slate-400 uppercase font-bold mb-1">Nagad Agent Number</label>
+                        <input type="text" id="dbNagadNum" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-500">
                     </div>
-                    <button onclick="updateNumbers()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl font-bold text-xs text-slate-950 uppercase tracking-wider transition">
-                        Save Parameters
+                    <button onclick="saveGatewayNumbers()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-lg font-black text-xs text-slate-950 uppercase tracking-wider transition active:scale-[0.99]">
+                        Apply Numbers Live
                     </button>
                 </div>
             </section>
 
-            <section class="space-y-3">
-                <h3 class="text-xs font-black uppercase tracking-wider text-amber-400 border-b border-white/5 pb-2">
-                    <i class="fa-solid fa-clock mr-1"></i> Live Pending Deposits
+            <section class="bg-slate-900 border border-white/5 rounded-xl p-4 shadow-xl space-y-3.5">
+                <h3 class="text-[11px] font-black text-teal-400 uppercase tracking-wider border-b border-white/5 pb-1.5">
+                    <i class="fa-solid fa-user-shield mr-1"></i> Create Sub-Admin Account
                 </h3>
-                <div id="depositContainer" class="space-y-3"></div>
+                <div class="space-y-2.5">
+                    <div>
+                        <label class="block text-[8px] text-slate-400 uppercase font-bold mb-1">Sub-Admin Username</label>
+                        <input type="text" id="subUser" placeholder="e.g., subadmin01" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] text-slate-400 uppercase font-bold mb-1">Sub-Admin Password</label>
+                        <input type="password" id="subPass" placeholder="******" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-teal-500">
+                    </div>
+                    <button onclick="provisionSubAdmin()" class="w-full bg-teal-600 hover:bg-teal-500 py-2.5 rounded-lg font-black text-xs text-slate-950 uppercase tracking-wider transition active:scale-[0.99]">
+                        Deploy Sub Node
+                    </button>
+                </div>
             </section>
 
-            <section class="space-y-3">
-                <h3 class="text-xs font-black uppercase tracking-wider text-blue-400 border-b border-white/5 pb-2">
-                    <i class="fa-solid fa-money-bill-transfer mr-1"></i> Live Pending Withdrawals
+            <section class="space-y-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-amber-400 border-b border-white/5 pb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-down text-[10px]"></i> Pending Deposits
                 </h3>
-                <div id="withdrawContainer" class="space-y-3"></div>
+                <div id="liveDepositQueue" class="space-y-3"></div>
             </section>
 
-            <section class="space-y-3">
-                <h3 class="text-xs font-black uppercase tracking-wider text-slate-300 border-b border-white/5 pb-2">
-                    <i class="fa-solid fa-database mr-1"></i> Registered User Records
+            <section class="space-y-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-blue-400 border-b border-white/5 pb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-up text-[10px]"></i> Pending Withdrawals
                 </h3>
-                <div id="usersContainer" class="space-y-2"></div>
+                <div id="liveWithdrawQueue" class="space-y-3"></div>
             </section>
 
-            <section class="bg-slate-900 border border-white/10 rounded-2xl p-4 shadow-xl text-center">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-wider mb-2 text-left">
-                    <i class="fa-solid fa-comments mr-1"></i> Live Helpdesk
+            <section class="space-y-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-300 border-b border-white/5 pb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users-gear text-[10px]"></i> Members & Investment Ledger
                 </h3>
-                <a href="https://dashboard.tawk.to/" target="_blank" class="block w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/20 font-bold text-center py-2.5 rounded-xl text-xs uppercase tracking-wider transition">
-                    Open Tawk.to Console
-                </a>
+                <div id="liveUsersRegistry" class="space-y-2.5"></div>
+            </section>
+
+            <section class="bg-slate-900 border border-white/5 rounded-xl p-3 shadow-2xl space-y-2">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-headset text-emerald-400"></i> Customer Live Helpdesk
+                </h3>
+                <div class="w-full h-[400px] rounded-lg overflow-hidden border border-white/5 bg-slate-950">
+                    <iframe src="https://dashboard.tawk.to/" class="w-full h-full border-none"></iframe>
+                </div>
             </section>
 
         </main>
@@ -163,7 +155,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <script>
         // 🔐 আপনার ফায়ারবেস কনফিগারেশন সেটআপ
@@ -179,176 +170,240 @@
         
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
-        const auth = firebase.auth();
 
-        let currentUser = null;
-        let selectedGateway = "";
-
-        // 🔄 স্টেট রিফ্রেশ প্রোটেকশন হ্যান্ডলার
+        // 🔄 সেশন রিলোদ প্রোটেকশন ইঞ্জিন
         window.onload = function() {
-            const isAdminLoggedIn = localStorage.getItem("adminLoggedIn");
-            if (isAdminLoggedIn === "true") {
-                activateAdminView();
-            } else {
-                initUserDashboard();
+            const currentAdminSession = localStorage.getItem("activeAdminToken");
+            if (currentAdminSession) {
+                initializeSecureConsole(currentAdminSession);
             }
         };
 
-        // ==========================================
-        // 📱 ইউজার মেথডস
-        // ==========================================
-        function initUserDashboard() {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    db.collection("users").doc(user.uid).onSnapshot(doc => {
-                        if (doc.exists) {
-                            document.getElementById("userBalanceDisplay").innerText = "$" + (doc.data().balance || 0).toFixed(2);
-                        }
-                    });
-                }
-            });
-        }
+        function processAdminAuthentication() {
+            const inputUser = document.getElementById('authAdminUser').value.trim();
+            const inputPass = document.getElementById('authAdminPass').value.trim();
 
-        function calculateExchange() {
-            const usd = parseFloat(document.getElementById('usdAmount').value) || 0;
-            document.getElementById('totalBdtDisplay').innerText = (usd * 127).toFixed(2);
-        }
-
-        function openGateway(type) {
-            selectedGateway = type;
-            document.getElementById('paymentBox').classList.remove('hidden');
-            document.getElementById('gatewayTitle').innerText = type;
-            
-            db.collection("settings").doc("gateways").get().then((doc) => {
-                if (doc.exists) {
-                    const key = type.toLowerCase();
-                    document.getElementById('adminNumber').innerText = doc.data()[key] || "নম্বর সেট করা নেই";
-                }
-            });
-        }
-
-        function submitDeposit() {
-            const usd = parseFloat(document.getElementById('usdAmount').value);
-            const sender = document.getElementById('senderNum').value.trim();
-            const trx = document.getElementById('trxId').value.trim();
-
-            if (!usd || usd < 6) { Swal.fire('Error', 'সর্বনিম্ন $6.00 ডিপোজিট করতে হবে।', 'error'); return; }
-            if (!sender || !trx) { Swal.fire('Error', 'সব ঘর পূরণ করুন।', 'error'); return; }
-
-            db.collection("deposits").add({
-                uid: currentUser ? currentUser.uid : "guest_uid",
-                email: currentUser ? currentUser.email : "user@zenith.com",
-                amount: usd,
-                gateway: selectedGateway,
-                senderNumber: sender,
-                transactionId: trx,
-                status: "pending",
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                Swal.fire('Success', 'রিকোয়েস্ট সাবমিট হয়েছে!', 'success');
-                document.getElementById('usdAmount').value = '';
-                document.getElementById('senderNum').value = '';
-                document.getElementById('trxId').value = '';
-                document.getElementById('paymentBox').classList.add('hidden');
-            });
-        }
-
-        // ==========================================
-        // 🔐 ওয়ান-পেজ এডমিন প্যানেল আর্কিটেকচার (কমান্ড অনুযায়ী)
-        // ==========================================
-        function triggerAdminLoginPrompt() { document.getElementById('adminLoginPopup').classList.remove('hidden'); }
-        function closeAdminLoginPrompt() { document.getElementById('adminLoginPopup').classList.add('hidden'); }
-
-        function checkAdminLogin() {
-            const user = document.getElementById('adminUser').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
-            if (user === "shamim040" && pass === "12345") {
-                localStorage.setItem("adminLoggedIn", "true");
-                closeAdminLoginPrompt();
-                activateAdminView();
+            if (inputUser === "shamim040" && inputPass === "12345") {
+                localStorage.setItem("activeAdminToken", "shamim040");
+                initializeSecureConsole("shamim040");
             } else {
-                Swal.fire('Denied', 'ভুল পাসওয়ার্ড বা ইউজারনেম!', 'error');
+                db.collection("sub_admins").doc(inputUser).get().then((doc) => {
+                    if (doc.exists && doc.data().password === inputPass) {
+                        localStorage.setItem("activeAdminToken", inputUser);
+                        initializeSecureConsole(inputUser);
+                    } else {
+                        Swal.fire({ text: 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0f172a', color: '#fff' });
+                    }
+                }).catch(() => {
+                    Swal.fire({ text: 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0f172a', color: '#fff' });
+                });
             }
         }
 
-        function activateAdminView() {
-            document.getElementById('userDashboardView').classList.add('hidden');
-            document.getElementById('adminDashboardView').classList.remove('hidden');
-            initAdminSystem();
+        function initializeSecureConsole(adminNodeName) {
+            document.getElementById('adminAuthScreen').classList.add('hidden');
+            document.getElementById('adminMainDashboard').classList.remove('hidden');
+            document.getElementById('activeNodeDisplay').innerText = "Node: " + adminNodeName;
+            runLiveSyncModules();
         }
 
-        function adminLogout() {
-            localStorage.removeItem("adminLoggedIn");
+        function terminateAdminSession() {
+            localStorage.removeItem("activeAdminToken");
             window.location.reload();
         }
 
-        // সব তথ্য এক পেজে রিয়েল-টাইম লোড ইঞ্জিন
-        function initAdminSystem() {
+        // ==========================================
+        // 🔄 ৪-কোর লাইভ মোবাইল ডাটা মডিউলস
+        // ==========================================
+        function runLiveSyncModules() {
             
-            // ১. লাইভ ডিপোজিট ডাটা ফিড
-            db.collection("deposits").onSnapshot(snapshot => {
+            // ১. মোবাইল ডিপোজিট রিকোয়েস্ট লুপ
+            db.collection("deposits").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if(data.status === "pending") {
+                        const timeString = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just Now';
                         html += `
-                            <div class="bg-slate-900 border border-amber-500/20 p-4 rounded-xl space-y-2.5 shadow-xl text-left">
-                                <div class="flex justify-between items-start">
-                                    <div class="max-w-[70%]">
-                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">User Account</p>
-                                        <p class="text-xs font-bold text-slate-200 break-all">${data.email}</p>
+                            <div class="bg-slate-900 border border-amber-500/10 p-3.5 rounded-xl space-y-2.5 shadow-md">
+                                <div class="flex justify-between items-center border-b border-white/5 pb-1.5">
+                                    <div class="max-w-[60%]">
+                                        <p class="text-[8px] text-slate-500 uppercase font-black">User ID</p>
+                                        <p class="text-xs font-bold text-slate-200 truncate">${data.email || 'N/A'}</p>
                                     </div>
-                                    <span class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">${data.gateway}: $${data.amount}</span>
+                                    <span class="text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">${data.gateway}: $${data.amount}</span>
                                 </div>
-                                <div class="bg-slate-950 p-2.5 rounded-lg font-mono text-[11px] text-slate-400 space-y-1">
-                                    <p>TrxID: <span class="text-white font-bold select-all">${data.transactionId}</span></p>
-                                    <p>Sender Number: <span class="text-amber-400 font-bold">${data.senderNumber}</span></p>
+                                <div class="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-slate-400 space-y-0.5">
+                                    <p>TrxID: <span class="text-white font-bold select-all">${data.transactionId || '---'}</span></p>
+                                    <p>Sender No: <span class="text-amber-400 font-bold">${data.senderNumber || '---'}</span></p>
+                                    <p class="text-[8px] text-slate-600 text-right pt-1"><i class="fa-solid fa-clock"></i> ${timeString}</p>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button onclick="approveDeposit('${doc.id}', '${data.uid}', ${data.amount})" class="bg-emerald-600 text-slate-950 font-black text-xs py-2 rounded-xl">Approve</button>
-                                    <button onclick="rejectDeposit('${doc.id}')" class="bg-red-950 text-red-400 font-bold text-xs py-2 rounded-xl border border-red-500/20">Reject</button>
+                                <div class="grid grid-cols-2 gap-2 pt-0.5">
+                                    <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount}, 'approve')" class="bg-emerald-600 text-slate-950 font-black text-xs py-2 rounded-lg active:opacity-80">Approve</button>
+                                    <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount}, 'reject')" class="bg-red-950 text-red-400 font-bold text-xs py-2 rounded-lg border border-red-500/10 active:opacity-80">Reject</button>
                                 </div>
                             </div>`;
                     }
                 });
-                document.getElementById('depositContainer').innerHTML = html || '<div class="text-center py-4 text-slate-500 text-xs italic bg-slate-900 rounded-xl border border-white/5">কোনো পেন্ডিং ডিপোজিট নেই।</div>';
+                document.getElementById('liveDepositQueue').innerHTML = html || '<div class="text-center py-4 text-slate-500 text-xs italic bg-slate-900 rounded-xl border border-white/5">কোনো রিকোয়েস্ট নেই।</div>';
             });
 
-            // ২. লাইভ উইথড্র ডাটা ফিড
-            db.collection("withdraws").onSnapshot(snapshot => {
+            // ২. মোবাইল উইথড্র রিকোয়েস্ট লুপ ($ এবং BDT অটো কনভার্ট)
+            db.collection("withdraws").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if(data.status === "pending") {
+                        const dollarAmount = parseFloat(data.amount) || 0;
+                        const bdtAmount = (dollarAmount * 127).toFixed(2);
+                        const timeString = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just Now';
+                        
                         html += `
-                            <div class="bg-slate-900 border border-blue-500/20 p-4 rounded-xl space-y-2.5 shadow-xl text-left">
-                                <div class="flex justify-between items-start">
-                                    <div class="max-w-[70%]">
-                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">User Account</p>
-                                        <p class="text-xs font-bold text-slate-200 break-all">${data.email}</p>
+                            <div class="bg-slate-900 border border-blue-500/10 p-3.5 rounded-xl space-y-2.5 shadow-md">
+                                <div class="flex justify-between items-center border-b border-white/5 pb-1.5">
+                                    <div class="max-w-[60%]">
+                                        <p class="text-[8px] text-slate-500 uppercase font-black">User ID</p>
+                                        <p class="text-xs font-bold text-slate-200 truncate">${data.email || 'N/A'}</p>
                                     </div>
-                                    <span class="text-xs font-black text-blue-400 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">Withdraw: $${data.amount}</span>
+                                    <div class="text-right">
+                                        <span class="block text-[10px] font-black text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">Req: $${dollarAmount}</span>
+                                        <span class="block text-[11px] font-black text-orange-400 mt-0.5">৳ ${bdtAmount}</span>
+                                    </div>
                                 </div>
-                                <div class="bg-slate-950 p-2.5 rounded-lg font-mono text-[11px] text-slate-400 space-y-1">
-                                    <p>Method: <span class="text-white font-bold">${data.gateway}</span></p>
-                                    <p>Account: <span class="text-blue-400 font-bold select-all">${data.accountNumber}</span></p>
+                                <div class="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-slate-400 space-y-0.5">
+                                    <p>Wallet: <span class="text-white font-bold">${data.gateway || 'bKash'}</span></p>
+                                    <p>Acc No: <span class="text-blue-400 font-bold select-all">${data.accountNumber || '---'}</span></p>
+                                    <p class="text-[8px] text-slate-600 text-right pt-1"><i class="fa-solid fa-clock"></i> ${timeString}</p>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button onclick="approveWithdraw('${doc.id}')" class="bg-blue-600 text-white font-black text-xs py-2 rounded-xl">Success</button>
-                                    <button onclick="rejectWithdraw('${doc.id}', '${data.uid}', ${data.amount})" class="bg-red-950 text-red-400 font-bold text-xs py-2 rounded-xl border border-red-500/20">Reject</button>
+                                <div class="grid grid-cols-2 gap-2 pt-0.5">
+                                    <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${dollarAmount}, 'approve')" class="bg-blue-600 text-white font-black text-xs py-2 rounded-lg active:opacity-80">Paid</button>
+                                    <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${dollarAmount}, 'reject')" class="bg-red-950 text-red-400 font-bold text-xs py-2 rounded-lg border border-red-500/10 active:opacity-80">Reject</button>
                                 </div>
                             </div>`;
                     }
                 });
-                document.getElementById('withdrawContainer').innerHTML = html || '<div class="text-center py-4 text-slate-500 text-xs italic bg-slate-900 rounded-xl border border-white/5">কোনো পেন্ডিং উইথড্র নেই।</div>';
+                document.getElementById('liveWithdrawQueue').innerHTML = html || '<div class="text-center py-4 text-slate-500 text-xs italic bg-slate-900 rounded-xl border border-white/5">কোনো রিকোয়েস্ট নেই।</div>';
             });
 
-            // ৩. অল ইউজার ডেটাবেজ ফিড
+            // ৩. মোবাইল মেম্বার লিস্ট ও লাইভ ডাটাবেজ এডিটর (মেয়াদ শেষ হলে ব্লিংক করবে)
             db.collection("users").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
                     const user = doc.data();
+                    
+                    let isExpired = false;
+                    if (user.planExpiry) {
+                        if (new Date(user.planExpiry) < new Date()) { isExpired = true; }
+                    }
+
                     html += `
-                        <div class="bg-slate-900 border border-white/5 p-4 rounded-xl space-y-2 text-left shadow-md">
-                            <p class="text-xs font-bold text-slate
+                        <div class="bg-slate-900 border ${isExpired ? 'border-red-500/30' : 'border-white/5'} p-3.5 rounded-xl space-y-2 shadow-md relative">
+                            ${isExpired ? '<span class="absolute top-2 right-2 text-[7px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-wider animate-pulse">Expired</span>' : ''}
+                            <div class="max-w-[75%]">
+                                <p class="text-[8px] text-slate-500 uppercase font-black">User Email</p>
+                                <p class="text-xs font-bold text-slate-200 truncate">${user.email || 'N/A'}</p>
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-400">
+                                <div class="flex justify-between"><span>Balance:</span><strong class="text-emerald-400">$${(user.balance || 0).toFixed(2)}</strong></div>
+                                <div class="flex justify-between"><span>Invested:</span><strong class="text-amber-400">$${(user.totalInvestment || 0).toFixed(2)}</strong></div>
+                                <div class="flex justify-between"><span>Password:</span><strong class="text-blue-400">${user.password || '***'}</strong></div>
+                            </div>
+                            <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="w-full bg-slate-800 text-[10px] py-1.5 rounded-md font-bold uppercase active:bg-slate-700 transition">
+                                Edit Balance
+                            </button>
+                        </div>`;
+                });
+                document.getElementById('liveUsersRegistry').innerHTML = html;
+            });
+
+            // ৪. লাইভ নম্বর গেটওয়ে ডিফল্ট লোড
+            db.collection("settings").doc("gateways").get().then((doc) => {
+                if(doc.exists) {
+                    document.getElementById('dbBkashNum').value = doc.data().bkash || '';
+                    document.getElementById('dbNagadNum').value = doc.data().nagad || '';
+                }
+            });
+        }
+
+        // ==========================================
+        // 🛠️ অ্যাকশন স্ক্রিপ্ট মডিউলস
+        // ==========================================
+        function saveGatewayNumbers() {
+            const bkash = document.getElementById('dbBkashNum').value.trim();
+            const nagad = document.getElementById('dbNagadNum').value.trim();
+            db.collection("settings").doc("gateways").set({ bkash: bkash, nagad: nagad }, { merge: true })
+            .then(() => { Swal.fire({ text: 'নম্বর আপডেট হয়েছে!', icon: 'success', background: '#0f172a', color: '#fff' }); });
+        }
+
+        function provisionSubAdmin() {
+            const user = document.getElementById('subUser').value.trim();
+            const pass = document.getElementById('subPass').value.trim();
+            if(!user || !pass) return;
+
+            db.collection("sub_admins").doc(user).set({ password: pass })
+            .then(() => {
+                Swal.fire({ text: 'সাব-এডমিন নোড তৈরি সফল!', icon: 'success', background: '#0f172a', color: '#fff' });
+                document.getElementById('subUser').value = '';
+                document.getElementById('subPass').value = '';
+            });
+        }
+
+        function executeDepositAction(docId, uid, amount, actionType) {
+            if(actionType === 'approve') {
+                db.collection("deposits").doc(docId).update({ status: "success" }).then(() => {
+                    const userRef = db.collection("users").doc(uid);
+                    db.runTransaction(transaction => {
+                        return transaction.get(userRef).then(userDoc => {
+                            let oldBalance = userDoc.exists ? (parseFloat(userDoc.data().balance) || 0) : 0;
+                            let oldInvest = userDoc.exists ? (parseFloat(userDoc.data().totalInvestment) || 0) : 0;
+                            transaction.set(userRef, { 
+                                balance: oldBalance + amount,
+                                totalInvestment: oldInvest + amount 
+                            }, { merge: true });
+                        });
+                    }).then(() => { Swal.fire({ text: 'ডিপোজিট এপ্রুভড!', icon: 'success', background: '#0f172a', color: '#fff' }); });
+                });
+            } else {
+                db.collection("deposits").doc(docId).update({ status: "failed" }).then(() => {
+                    Swal.fire({ text: 'রিকোয়েস্ট বাতিল!', icon: 'success', background: '#0f172a', color: '#fff' });
+                });
+            }
+        }
+
+        function executeWithdrawAction(docId, uid, amount, actionType) {
+            if(actionType === 'approve') {
+                db.collection("withdraws").doc(docId).update({ status: "success" }).then(() => {
+                    Swal.fire({ text: 'পেইড মার্ক করা হয়েছে!', icon: 'success', background: '#0f172a', color: '#fff' });
+                });
+            } else {
+                db.collection("withdraws").doc(docId).update({ status: "failed" }).then(() => {
+                    const userRef = db.collection("users").doc(uid);
+                    db.runTransaction(transaction => {
+                        return transaction.get(userRef).then(userDoc => {
+                            let oldBalance = userDoc.exists ? (parseFloat(userDoc.data().balance) || 0) : 0;
+                            transaction.set(userRef, { balance: oldBalance + amount }, { merge: true });
+                        });
+                    }).then(() => { Swal.fire({ text: 'উইথড্র বাতিল ও ডলার রিফান্ডেড!', icon: 'success', background: '#0f172a', color: '#fff' }); });
+                });
+            }
+        }
+
+        function modifyUserBalancePrompt(uid, currentBal) {
+            Swal.fire({
+                title: 'Edit Balance',
+                input: 'number',
+                inputValue: currentBal,
+                showCancelButton: true,
+                background: '#0f172a',
+                color: '#fff',
+                confirmButtonColor: '#059669'
+            }).then((result) => {
+                if (result.isConfirmed && result.value !== "") {
+                    db.collection("users").doc(uid).update({ balance: parseFloat(result.value) })
+                    .then(() => { Swal.fire({ text: 'ব্যালেন্স আপডেট সম্পন্ন!', icon: 'success', background: '#0f172a', color: '#fff' }); });
+                }
+            });
+        }
+    </script>
+</body>
+                    </html>
