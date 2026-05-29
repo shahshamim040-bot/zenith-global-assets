@@ -115,18 +115,9 @@ if(regForm) {
         const refUID = inputs[3].value.trim() || "none";
 
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
-            // রেফারেল বোনাস লজিক
             if (refUID !== "none") {
-                db.collection('users').doc(refUID).update({
-                    balance: firebase.firestore.FieldValue.increment(2) // ২ ডলার বোনাস
-                });
-                db.collection('transactions').add({
-                    userId: refUID,
-                    type: "Referral Bonus",
-                    amount: 2,
-                    status: "Success",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                db.collection('users').doc(refUID).update({ balance: firebase.firestore.FieldValue.increment(2) });
+                db.collection('transactions').add({ userId: refUID, type: "Referral Bonus", amount: 2, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
             }
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
@@ -181,7 +172,6 @@ function processDailyYields(user) {
                     const totalEarned = node.dailyProfitAmount * daysPassed;
                     db.collection("users").doc(user.uid).update({ earningBalance: firebase.firestore.FieldValue.increment(totalEarned) });
                     db.collection("active_nodes").doc(doc.id).update({ lastClaimTime: firebase.firestore.FieldValue.serverTimestamp() });
-                    // অটো প্রফিট হিস্ট্রি
                     db.collection("transactions").add({ userId: user.uid, type: "Daily Profit", amount: totalEarned, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
             }
@@ -214,30 +204,19 @@ function submitDeposit() {
     const senderNum = document.getElementById('senderNum').value.trim();
     const trxId = document.getElementById('trxId').value.trim();
 
-    if (!usdAmount || usdAmount <= 0) { return; }
+    if (!usdAmount || usdAmount <= 0 || !trxId) { 
+        CustomSwal.fire({ icon: 'error', title: 'Action Required', text: 'Please fill all details correctly.' });
+        return; 
+    }
 
-    const depositPayload = {
+    db.collection("transactions").add({
         userId: currentUser.uid,
-        userName: document.getElementById('userName').innerText,
+        type: "Deposit (" + activeGateway + ")",
         amount: usdAmount,
-        gateway: activeGateway,
-        senderNumber: senderNum,
-        transactionId: trxId,
-        status: "Pending", 
-        type: "Deposit",
+        status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    db.collection("deposits").add(depositPayload).then(() => {
-        db.collection("transactions").add({
-            userId: currentUser.uid,
-            type: "Deposit (" + activeGateway + ")",
-            amount: usdAmount,
-            status: "Pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Node Verification.' });
+    }).then(() => {
+        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Verification.' });
         document.getElementById('paymentBox').classList.add('hidden');
     });
 }
@@ -251,17 +230,11 @@ function processWithdrawal() {
     const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
     const currentBal = parseFloat(document.getElementById('userBalance').innerText);
     
-    // ভ্যালিডেশন
-    if (amount < 20) {
-        CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'মিনিমাম ২০ ডলার উইথড্র করতে হবে!' });
-        return;
-    }
-    if (amount > currentBal) {
-        CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'আপনার পর্যাপ্ত ব্যালেন্স নাই!' });
-        return;
-    }
+    if (amount < 20) { CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Minimum withdrawal is $20.' }); return; }
+    if (amount > currentBal) { CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'Insufficient balance!' }); return; }
+    if (!account) { CustomSwal.fire({ icon: 'error', title: 'Missing Info', text: 'Please enter account number.' }); return; }
 
-    const finalAmount = amount - 1; // ১ ডলার চার্জ কেটে বাকিটা প্রসেস
+    const finalAmount = amount - 1; 
 
     db.collection("withdraws").add({
         userId: currentUser.uid,
@@ -280,8 +253,7 @@ function processWithdrawal() {
             status: "Pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
-        CustomSwal.fire({ icon: 'success', title: 'Pipeline Deployed', text: 'উইথড্র রিকোয়েস্ট সফল! ১ ডলার চার্জ কাটা হয়েছে।' });
+        CustomSwal.fire({ icon: 'success', title: 'Request Sent', text: 'Withdrawal under review.' });
     });
 }
 
@@ -291,26 +263,23 @@ function processWithdrawal() {
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
     
-    // স্মার্ট ব্যালেন্স চেক
     if (currentBalance < cost) {
-        CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'আপনার ব্যালেন্স নাই! আগে ডলার এড করুন।' });
+        CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'Please deposit funds first.' });
         return;
     }
 
-    const nodePayload = {
+    db.collection("active_nodes").add({
         userId: currentUser.uid,
         planName: planName,
         cost: cost,
         dailyProfitAmount: cost * rate,
         status: "Active",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    db.collection("active_nodes").add(nodePayload).then(() => {
+    }).then(() => {
         db.collection("users").doc(currentUser.uid).update({
             balance: firebase.firestore.FieldValue.increment(-cost),
             activeInvestment: firebase.firestore.FieldValue.increment(cost),
-            purchasedCount: firebase.firestore.FieldValue.increment(1) // প্ল্যান কাউন্ট আপডেট
+            purchasedCount: firebase.firestore.FieldValue.increment(1)
         });
         
         db.collection("transactions").add({
@@ -321,37 +290,33 @@ function buyPlan(cost, days, rate, planName) {
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'প্ল্যানটি সফলভাবে কেনা হয়েছে।' });
+        CustomSwal.fire({ icon: 'success', title: 'Node Active', text: 'Node deployed successfully.' });
     });
 }
 
 // ==========================================
-// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS
+// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS (FIXED)
 // ==========================================
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
 
     db.collection("transactions")
-        .where("userId", "==", currentUser.uid)
-        .orderBy("timestamp", "desc")
-        .onSnapshot(snapshot => {
-            tableBody.innerHTML = ""; 
-            snapshot.forEach(doc => {
-                const log = doc.data();
-                // স্ট্যাটাস অনুযায়ী কালার কোড
-                let color = "text-blue-400";
-                if(log.status === "Success") color = "text-emerald-400";
-                if(log.status === "Pending") color = "text-amber-400";
-
-                tableBody.innerHTML += `
-                <tr class="border-b border-white/5">
-                    <td class="p-3 text-xs">${log.type}</td>
-                    <td class="p-3 text-xs">$${log.amount || 0}</td>
-                    <td class="p-3 text-xs ${color}">${log.status}</td>
-                </tr>`;
-            });
+      .where("userId", "==", currentUser.uid)
+      .orderBy("timestamp", "desc")
+      .onSnapshot(snapshot => {
+        tableBody.innerHTML = ""; 
+        snapshot.forEach(doc => {
+            const log = doc.data();
+            let color = log.status === "Success" ? "text-emerald-400" : (log.status === "Pending" ? "text-amber-400" : "text-blue-400");
+            tableBody.innerHTML += `
+            <tr class="border-b border-white/5">
+                <td class="p-3 text-xs">${log.type}</td>
+                <td class="p-3 text-xs">$${log.amount || 0}</td>
+                <td class="p-3 text-xs ${color} font-bold">${log.status}</td>
+            </tr>`;
         });
+    });
 }
 
 // ==========================================
@@ -369,7 +334,6 @@ db.collection("settings").doc("gateways").onSnapshot(doc => {
         const data = doc.data();
         if (data.bkash) gatewayNumbers.Bkash = data.bkash + " (bKash Agent)";
         if (data.nagad) gatewayNumbers.Nagad = data.nagad + " (Nagad Agent)";
-        
         const adminNumberDisplay = document.getElementById('adminNumber');
         const gatewayTitle = document.getElementById('gatewayTitle');
         if (adminNumberDisplay && gatewayTitle) {
