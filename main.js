@@ -195,7 +195,7 @@ function copyReferral() {
 }
 
 // ==========================================
-// ১০. ASSET DEPOSIT GATEWAY (অটো-আপডেট লজিক সংযুক্ত)
+// ১০. ASSET DEPOSIT GATEWAY
 // ==========================================
 function openGateway(gateway) {
     activeGateway = gateway;
@@ -208,6 +208,7 @@ function submitDeposit() {
     const usdAmount = parseFloat(document.getElementById('usdAmount').value);
     const senderNum = document.getElementById('senderNum').value.trim();
     const trxId = document.getElementById('trxId').value.trim();
+    const receiverNum = document.getElementById('adminNumber').innerText; 
 
     if (!usdAmount || usdAmount <= 0 || !senderNum || !trxId) { 
         CustomSwal.fire({ icon: 'error', title: 'Error', text: 'All fields required!' });
@@ -220,6 +221,7 @@ function submitDeposit() {
         amount: usdAmount,
         gateway: activeGateway,
         senderNum: senderNum,
+        receiverNum: receiverNum,
         trxId: trxId,
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -238,7 +240,7 @@ function submitDeposit() {
 }
 
 // ==========================================
-// ১১. ASSET DISINVESTMENT CORE (অটো-আপডেট লজিক সংযুক্ত)
+// ১১. ASSET DISINVESTMENT CORE
 // ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -309,7 +311,7 @@ function buyPlan(cost, days, rate, planName) {
 }
 
 // ==========================================
-// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS (অটোমেটিক ব্যালেন্স আপডেটের লিসেনার)
+// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS
 // ==========================================
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
@@ -357,15 +359,23 @@ db.collection("settings").doc("gateways").onSnapshot(doc => {
 });
 
 // ==========================================
-// ১৬. AUTOMATIC BALANCE SYNC (Cloud Function Triggers)
+// ১৬. AUTOMATIC CLOUD FUNCTIONS (Firebase-এ বসাবেন)
 // ==========================================
-// এই লজিকটি Firebase Cloud Functions-এ যোগ করবেন:
 /*
-exports.syncBalance = functions.firestore.document('deposit_requests/{id}').onUpdate((change) => {
+exports.processAutoBalance = functions.firestore.document('deposit_requests/{id}').onUpdate((change) => {
     const data = change.after.data();
     if (data.status === 'Success') {
         return admin.firestore().collection('users').doc(data.userId).update({
             balance: admin.firestore.FieldValue.increment(data.amount)
+        });
+    }
+});
+
+exports.processAutoWithdraw = functions.firestore.document('withdraw_requests/{id}').onUpdate((change) => {
+    const data = change.after.data();
+    if (data.status === 'Success') {
+        return admin.firestore().collection('users').doc(data.userId).update({
+            balance: admin.firestore.FieldValue.increment(-data.amount)
         });
     }
 });
