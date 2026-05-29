@@ -1,6 +1,6 @@
 // ১. Firebase Config (আপনার অরিজিনাল স্ক্রিনশট মিলিয়ে ১০০% ফিক্সড)
 const firebaseConfig = {
-    apiKey: "AIzaSyC4k_mvbX_KY7dtSUkjiE0a11xgu8KqVkY",
+    apiKey: AIzaSyC4K_nvbX_KY7dtSUkjIE0s11xgu8KqVkY
     authDomain: "zenith-global-assets.firebaseapp.com",
     projectId: "zenith-global-assets",
     storageBucket: "zenith-global-assets.firebasestorage.app",
