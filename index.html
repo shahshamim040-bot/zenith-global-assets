@@ -16,7 +16,6 @@
 <body class="flex items-center justify-center min-h-screen p-4 bg-gradient-to-tr from-[#020617] via-[#030f1e] to-[#041d13]">
 
     <div class="w-full max-w-md my-8">
-        <!-- Brand Identity Section (Centered Above Card) -->
         <div class="text-center mb-8 relative z-10">
             <div class="relative inline-block mb-3">
                 <div class="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"></div>
@@ -26,15 +25,12 @@
             <p class="text-[9px] text-emerald-500/80 tracking-[0.4em] uppercase mt-1.5 font-bold">Elite Asset Management</p>
         </div>
 
-        <!-- Main Auth Container -->
         <div class="glass-card p-8 rounded-[2.5rem] shadow-2xl relative border border-white/5">
-            <!-- Form Switcher Tabs -->
             <div class="flex justify-center mb-8 space-x-12 text-xs font-bold uppercase tracking-[0.2em]">
-                <button onclick="showLogin()" id="loginBtn" class="text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300">Login</button>
-                <button onclick="showRegister()" id="regBtn" class="text-slate-500 hover:text-white pb-2 transition-all duration-300">Register</button>
+                <button onclick="showLogin()" id="loginBtn" class="text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300 outline-none">Login</button>
+                <button onclick="showRegister()" id="regBtn" class="text-slate-500 hover:text-white pb-2 transition-all duration-300 outline-none">Register</button>
             </div>
 
-            <!-- 1. LOGIN FORM -->
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Secure Email</label>
@@ -44,10 +40,12 @@
                     <label class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Password</label>
                     <input type="password" id="loginPassword" placeholder="••••••••" required class="w-full input-style p-4 rounded-2xl outline-none text-sm">
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4.5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all duration-300 shadow-lg shadow-emerald-900/30 mt-6 active:scale-[0.98]">Access Account</button>
+                
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all duration-300 shadow-lg hover:shadow-emerald-500/20 mt-6 active:scale-[0.98] border border-emerald-500/30">
+                    Access Account
+                </button>
             </form>
 
-            <!-- 2. REGISTRATION FORM -->
             <form id="registerForm" class="space-y-4 hidden">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -76,7 +74,6 @@
                     </div>
                 </div>
 
-                <!-- Anti-Bot Verification (Captcha) -->
                 <div class="pt-2">
                     <label class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Security Captcha</label>
                     <div class="flex items-center space-x-3">
@@ -85,12 +82,15 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4.5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all duration-300 shadow-lg shadow-blue-900/30 mt-6 active:scale-[0.98]">Create Account</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all duration-300 shadow-lg hover:shadow-blue-500/20 mt-6 active:scale-[0.98] border border-blue-500/30">
+                    Create Account
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Firebase Core and Services SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -112,15 +112,15 @@
         function showLogin() {
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300";
-            document.getElementById('regBtn').className = "text-slate-500 hover:text-white pb-2 transition-all duration-300";
+            document.getElementById('loginBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300 outline-none";
+            document.getElementById('regBtn').className = "text-slate-500 hover:text-white pb-2 transition-all duration-300 outline-none";
         }
         
         function showRegister() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('registerForm').classList.remove('hidden');
-            document.getElementById('regBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300";
-            document.getElementById('loginBtn').className = "text-slate-500 hover:text-white pb-2 transition-all duration-300";
+            document.getElementById('regBtn').className = "text-emerald-400 border-b-2 border-emerald-400 pb-2 transition-all duration-300 outline-none";
+            document.getElementById('loginBtn').className = "text-slate-500 hover:text-white pb-2 transition-all duration-300 outline-none";
             generateCaptcha();
         }
 
@@ -128,6 +128,24 @@
         function checkCaptcha() {
             return document.getElementById('captchaInput').value.trim().toUpperCase() === currentCaptcha;
         }
+        
+        // ফর্ম সাবমিটের সময় ক্যাপচা মিসিং হ্যান্ডল করার সিকিউরিটি ও অটো-রিডাইরেক্ট লক প্রসেস
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            if(!checkCaptcha()) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // ফায়ারবেস কোড রান হওয়া থেকে বিরত রাখবে
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Security Mismatch',
+                    text: 'The Captcha code you entered is invalid. Please look closely and try again.',
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#ef4444'
+                });
+                generateCaptcha();
+                document.getElementById('captchaInput').value = "";
+            }
+        });
     </script>
 </body>
 </html>
