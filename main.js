@@ -60,7 +60,17 @@ if (loginForm) {
         const inputs = loginForm.querySelectorAll('input');
         auth.signInWithEmailAndPassword(inputs[0].value, inputs[1].value)
             .then(() => { window.location.href = "dashboard.html"; })
-            .catch(err => alert("Access Denied: " + err.message));
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: err.message,
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Try Again'
+                });
+            });
     });
 }
 
@@ -93,10 +103,29 @@ if(regForm) {
             });
         }).then(() => {
             auth.signOut().then(() => {
-                alert("Account verified successfully! Please log in to proceed.");
-                window.location.href = 'index.html';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Account Verified',
+                    text: 'Account verified successfully! Please log in to proceed.',
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Log In'
+                }).then(() => {
+                    window.location.href = 'index.html';
+                });
             });
-        }).catch(err => alert("System Error: " + err.message));
+        }).catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'System Error',
+                text: err.message,
+                background: '#020617',
+                color: '#fff',
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'OK'
+            });
+        });
     });
 }
 
@@ -162,7 +191,15 @@ function processDailyYields(user) {
 function copyReferral() {
     const linkText = document.getElementById('refLinkText').innerText;
     navigator.clipboard.writeText(linkText).then(() => {
-        alert("Referral Link Successfully Cloned to Clipboard!");
+        Swal.fire({
+            icon: 'success',
+            title: 'Cloned!',
+            text: 'Referral Link Successfully Cloned to Clipboard!',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Awesome'
+        });
     });
 }
 
@@ -180,11 +217,55 @@ function submitDeposit() {
     const trxId = document.getElementById('trxId').value.trim();
     const screenshotFile = document.getElementById('screenshot').files[0];
 
-    // কঠোর ভ্যালিডেশন চেক (নাম্বার, আইডি ও স্ক্রিনশট না দিলে সাবমিট হবে না)
-    if (!usdAmount || usdAmount <= 0) { return alert("Please specify a valid Allocation Value (USD)."); }
-    if (!senderNum) { return alert("Sender Account Number is mandatory."); }
-    if (!trxId) { return alert("Transaction Structure ID (TrxID) is mandatory."); }
-    if (!screenshotFile) { return alert("You must upload a Transfer Confirmation Screen Capture."); }
+    // কঠোর ভ্যালিডেশন চেক (SweetAlert2 ডার্ক থিম দ্বারা কাস্টমাইজড)
+    if (!usdAmount || usdAmount <= 0) { 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Input',
+            text: 'Please specify a valid Allocation Value (USD).',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Understand'
+        });
+        return; 
+    }
+    if (!senderNum) { 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Number',
+            text: 'Sender Account Number is mandatory.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'OK'
+        });
+        return; 
+    }
+    if (!trxId) { 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing TrxID',
+            text: 'Transaction Structure ID (TrxID) is mandatory.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'OK'
+        });
+        return; 
+    }
+    if (!screenshotFile) { 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Screenshot Required',
+            text: 'You must upload a Transfer Confirmation Screen Capture.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'OK'
+        });
+        return; 
+    }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
@@ -202,21 +283,39 @@ function submitDeposit() {
         senderNumber: senderNum,
         transactionId: trxId,
         screenshotName: screenshotName,
-        status: "Pending", // এডমিন প্যানেল থেকে এপ্রুভ করার জন্য পেন্ডিং থাকবে
+        status: "Pending", 
         type: "Deposit",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     db.collection("transactions").add(depositPayload)
     .then(() => {
-        alert("Deposit Packet Committed Successfully! Awaiting Admin Node Verification.");
+        Swal.fire({
+            icon: 'success',
+            title: 'Deposit Committed',
+            text: 'Deposit Packet Committed Successfully! Awaiting Admin Node Verification.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Great'
+        });
         document.getElementById('usdAmount').value = "";
         document.getElementById('senderNum').value = "";
         document.getElementById('trxId').value = "";
         document.getElementById('screenshot').value = "";
         document.getElementById('paymentBox').classList.add('hidden');
     })
-    .catch(error => alert("Transmission Error: " + error.message))
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Transmission Error',
+            text: error.message,
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK'
+        });
+    })
     .finally(() => {
         btn.disabled = false;
         btn.innerText = "Submit Deposit Request";
@@ -236,15 +335,39 @@ function processWithdrawal() {
 
     // ২০ ডলারের কম হলে ইনস্ট্যান্ট ইরোর এলার্ট
     if (!amount || amount < 20) { 
-        alert("Error: Minimum asset threshold for disinvestment is $20.00 USD."); 
+        Swal.fire({
+            icon: 'error',
+            title: 'Limit Restriction',
+            text: 'Error: Minimum asset threshold for disinvestment is $20.00 USD.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK'
+        });
         return; 
     }
     if (!account) { 
-        alert("Receiving Terminal Number cannot be left blank."); 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Blank Terminal',
+            text: 'Receiving Terminal Number cannot be left blank.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'OK'
+        });
         return; 
     }
     if (amount > currentBalance) { 
-        alert(`Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`); 
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Balance',
+            text: `Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`,
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK'
+        });
         return; 
     }
 
@@ -255,12 +378,11 @@ function processWithdrawal() {
         gateway: gateway.toUpperCase(),
         accountNumber: account,
         sourceAccount: source, 
-        status: "Pending", // সাবমিট করলে হিস্ট্রিতে Pending দেখাবে
+        status: "Pending", 
         type: "Withdrawal",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // ফায়ারস্টোরে ট্রানজেকশন লক করা এবং ইউজারের সিলেক্টেড অ্যাকাউন্ট থেকে টাকা কেটে রাখা
     db.collection("transactions").add(withdrawPayload)
     .then(() => {
         let updateField = {};
@@ -268,11 +390,29 @@ function processWithdrawal() {
         return db.collection("users").doc(currentUser.uid).update(updateField);
     })
     .then(() => {
-        alert("Disinvestment Pipeline Deployed! Liquidation processing is currently Pending.");
+        Swal.fire({
+            icon: 'success',
+            title: 'Pipeline Deployed',
+            text: 'Disinvestment Pipeline Deployed! Liquidation processing is currently Pending.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Done'
+        });
         document.getElementById('withdrawAmount').value = "";
         document.getElementById('withdrawAccount').value = "";
     })
-    .catch(error => alert("Liquidation Interruption: " + error.message));
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Liquidation Interruption',
+            text: error.message,
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK'
+        });
+    });
 }
 
 // ১০. Deploy Node Packages (বাস্তবধর্মী প্রফিট লজিক)
@@ -281,52 +421,92 @@ function buyPlan(cost, days, rate, planName) {
 
     // মেইন ব্যালেন্সে টাকা না থাকলে রিডাইরেক্ট করে ডিপোজিটে পাঠাবে
     if (currentBalance < cost) {
-        alert("Insufficient Node Deployment Capital. Please fund your main balance desk first.");
-        switchTab('deposit');
+        Swal.fire({
+            icon: 'error',
+            title: 'ব্যালেন্স অপর্যাপ্ত!',
+            text: 'Insufficient Node Deployment Capital. Please fund your main balance desk first.',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Fund Balance'
+        }).then(() => {
+            switchTab('deposit');
+        });
         return;
     }
 
-    if (confirm(`Confirm deployment of ${planName} for $${cost.toFixed(2)} USD?`)) {
-        const dailyProfit = cost * rate;
-        const totalMaturityReturn = cost + (dailyProfit * days);
+    // ব্রাউজার কনফার্মেশনের জায়গায় প্রিমিয়াম ডার্ক সুইটঅ্যালার্ট কনফার্ম বক্স
+    Swal.fire({
+        title: 'Confirm Deployment',
+        text: `Confirm deployment of ${planName} for $${cost.toFixed(2)} USD?`,
+        icon: 'question',
+        showCancelButton: true,
+        background: '#020617',
+        color: '#fff',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, Deploy Node',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const dailyProfit = cost * rate;
+            const totalMaturityReturn = cost + (dailyProfit * days);
 
-        // ১. একটিভ নোড ট্র্যাকিং ডাটাবেজ (অটো প্রফিট হিসাব রাখার জন্য)
-        const nodePayload = {
-            userId: currentUser.uid,
-            planName: planName,
-            cost: cost,
-            dailyProfitAmount: dailyProfit,
-            status: "Active",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
+            const nodePayload = {
+                userId: currentUser.uid,
+                planName: planName,
+                cost: cost,
+                dailyProfitAmount: dailyProfit,
+                status: "Active",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-        // ২. ট্রানজেকশন লগ ডাটাবেজ
-        const txnPayload = {
-            userId: currentUser.uid,
-            planName: planName,
-            cost: cost,
-            runtimeDays: days,
-            maturityReturn: totalMaturityReturn,
-            status: "Success",
-            type: "Plan Purchase",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
+            const txnPayload = {
+                userId: currentUser.uid,
+                planName: planName,
+                cost: cost,
+                runtimeDays: days,
+                maturityReturn: totalMaturityReturn,
+                status: "Success",
+                type: "Plan Purchase",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-        db.collection("active_nodes").add(nodePayload)
-        .then(() => {
-            return db.collection("transactions").add(txnPayload);
-        })
-        .then(() => {
-            // ইউজারের মেইন ব্যালেন্স থেকে টাকা কাটা এবং একটিভ ইনভেস্টমেন্টে যোগ করা
-            return db.collection("users").doc(currentUser.uid).update({
-                balance: firebase.firestore.FieldValue.increment(-cost),
-                activeInvestment: firebase.firestore.FieldValue.increment(cost),
-                purchasedCount: firebase.firestore.FieldValue.increment(1)
+            db.collection("active_nodes").add(nodePayload)
+            .then(() => {
+                return db.collection("transactions").add(txnPayload);
+            })
+            .then(() => {
+                return db.collection("users").doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-cost),
+                    activeInvestment: firebase.firestore.FieldValue.increment(cost),
+                    purchasedCount: firebase.firestore.FieldValue.increment(1)
+                });
+            })
+            .then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deployed Successfully',
+                    text: `${planName} Deployed Successfully! Computational node is now running.`,
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Excellent'
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Deployment Aborted',
+                    text: error.message,
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'OK'
+                });
             });
-        })
-        .then(() => alert(`${planName} Deployed Successfully! Computational node is now running.`))
-        .catch(error => alert("Deployment Aborted: " + error.message));
-    }
+        }
+    });
 }
 
 // ১১. Real-Time Audit Log History Synchronization
@@ -349,7 +529,6 @@ function listenToHistoryLog() {
             const log = doc.data();
             let statusBadge = "";
 
-            // লাইভ স্ট্যাটাস ব্যাজ কালার কনফিগারেশন
             if (log.status === "Pending") {
                 statusBadge = `<span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] uppercase animate-pulse">Pending</span>`;
             } else if (log.status === "Approved" || log.status === "Success") {
@@ -385,4 +564,4 @@ function listenToHistoryLog() {
 // ১২. Logout Function
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
-}
+                                                                                   }
