@@ -145,7 +145,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
     <script>
-        // 🔐 আপনার লাইভ ফায়ারবেস এপিআই এবং ক্লাউড ডিটেইলস
         const firebaseConfig = {
             apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjiE0s1ixguBkqVkY",
             authDomain: "zenith-global-assets.firebaseapp.com",
@@ -159,7 +158,6 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        // সেশন রিলোড লক ডিটেকশন হ্যান্ডলার
         window.onload = function() {
             const currentAdminSession = localStorage.getItem("activeAdminToken");
             if (currentAdminSession) { initializeSecureConsole(currentAdminSession); }
@@ -180,8 +178,6 @@
                     } else {
                         Swal.fire({ text: 'ভুল সিকিউরিটি ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0b0f19', color: '#fff' });
                     }
-                }).catch(() => {
-                    Swal.fire({ text: 'ভুল সিকিউরিটি ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0b0f19', color: '#fff' });
                 });
             }
         }
@@ -201,225 +197,90 @@
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
             const navButtons = btn.parentElement.querySelectorAll('button');
-            navButtons.forEach(b => {
-                b.classList.remove('text-emerald-400');
-                b.classList.add('text-slate-400');
-            });
+            navButtons.forEach(b => { b.classList.remove('text-emerald-400'); b.classList.add('text-slate-400'); });
             btn.classList.remove('text-slate-400');
             btn.classList.add('text-emerald-400');
         }
 
-        // ==========================================
-        // 🔄 রিয়েল-টাইম ডাটাবেজ হ্যান্ডলার মডিউলস
-        // ==========================================
         function runLiveSyncModules() {
-            
-            // কোম্পানির মোট ব্যালেন্স হিসাব ট্র্যাকার লুপ
             db.collection("users").onSnapshot(snapshot => {
                 let corporateTotal = 0;
                 let usersHtml = "";
-
                 snapshot.forEach(doc => {
                     const user = doc.data();
                     const investment = parseFloat(user.totalInvestment) || 0;
                     corporateTotal += investment;
-
-                    // মেয়াদ উত্তীর্ণ ডিটেকশন ট্র্যাকার
-                    let isExpired = false;
-                    if (user.planExpiry) {
-                        if (new Date(user.planExpiry) < new Date()) { isExpired = true; }
-                    }
-
-                    usersHtml += `
-                        <div class="bg-[#0b0f19] border ${isExpired ? 'border-red-500/40' : 'border-white/5'} p-3.5 rounded-xl space-y-2 relative shadow-md">
-                            ${isExpired ? '<span class="absolute top-2 right-2 text-[7px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-wider animate-pulse">Plan Expired</span>' : ''}
-                            <div>
-                                <p class="text-[8px] text-slate-500 uppercase font-black">User Email / ID</p>
-                                <p class="text-xs font-bold text-slate-200 truncate">${user.email || 'N/A'}</p>
-                            </div>
-                            <div class="bg-[#030712] p-2 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-400">
-                                <div class="flex justify-between"><span>Wallet Balance:</span><strong class="text-emerald-400">$${(user.balance || 0).toFixed(2)}</strong></div>
-                                <div class="flex justify-between"><span>Active Invest:</span><strong class="text-amber-400">$${investment.toFixed(2)}</strong></div>
-                                <div class="flex justify-between"><span>Passkey:</span><strong class="text-blue-400">${user.password || '***'}</strong></div>
-                            </div>
-                            <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="w-full bg-slate-800 text-[9px] py-1.5 rounded-lg font-bold uppercase active:scale-[0.99] transition">Modify Balance</button>
-                        </div>`;
+                    usersHtml += `<div class="bg-[#0b0f19] border border-white/5 p-3.5 rounded-xl space-y-2">
+                        <p class="text-[8px] text-slate-500 uppercase font-black">User: ${user.email || 'N/A'}</p>
+                        <div class="flex justify-between text-[10px]"><span class="text-slate-400">Balance:</span><strong class="text-emerald-400">$${(user.balance || 0).toFixed(2)}</strong></div>
+                        <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="w-full bg-slate-800 text-[9px] py-1.5 rounded-lg font-bold uppercase">Modify</button>
+                    </div>`;
                 });
-
                 document.getElementById('totalCorporateInvestment').innerText = "$" + corporateTotal.toFixed(2);
                 document.getElementById('liveUsersRegistry').innerHTML = usersHtml;
             });
 
-            // ইনবাউন্ড ডিপোজিট রিকোয়েস্ট ও বাটন লুপ
+            // সংশোধন: 'Pending' (বড় হাতের P) ব্যবহার করা হয়েছে
             db.collection("deposits").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    if(data.status === "pending") {
-                        const timeString = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just Now';
-                        html += `
-                            <div class="bg-[#0b0f19] border border-amber-500/10 p-3.5 rounded-xl space-y-2.5 shadow-md animate-fade-in">
-                                <div class="flex justify-between items-center border-b border-white/5 pb-1.5">
-                                    <div class="max-w-[60%]">
-                                        <p class="text-[8px] text-slate-500 uppercase font-black">User Node ID</p>
-                                        <p class="text-xs font-bold text-slate-200 truncate">${data.email || 'N/A'}</p>
-                                    </div>
-                                    <span class="text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">${data.gateway}: $${data.amount}</span>
-                                </div>
-                                <div class="bg-[#030712] p-2 rounded-lg font-mono text-[10px] text-slate-400 space-y-0.5">
-                                    <p>TrxID: <span class="text-white font-bold select-all">${data.transactionId || '---'}</span></p>
-                                    <p>Sender No: <span class="text-amber-400 font-bold">${data.senderNumber || '---'}</span></p>
-                                    <p class="text-[8px] text-slate-600 text-right pt-1"><i class="fa-solid fa-clock"></i> ${timeString}</p>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 pt-0.5">
-                                    <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount}, 'approve')" class="bg-emerald-600 text-slate-950 font-black text-xs py-2 rounded-lg active:scale-[0.98] transition">Approve</button>
-                                    <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount}, 'reject')" class="bg-red-950/80 text-red-400 font-bold text-xs py-2 rounded-lg border border-red-500/10 active:scale-[0.98] transition">Reject</button>
-                                </div>
-                            </div>`;
+                    if(data.status === "Pending") {
+                        html += `<div class="bg-[#0b0f19] border border-amber-500/10 p-3.5 rounded-xl">
+                            <p class="text-xs text-slate-200">${data.email}: $${data.amount}</p>
+                            <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount})" class="w-full bg-emerald-600 text-xs py-2 mt-2 rounded-lg font-bold">Approve</button>
+                        </div>`;
                     }
                 });
-                document.getElementById('liveDepositQueue').innerHTML = html || '<div class="text-center py-6 text-slate-500 text-xs italic bg-[#0b0f19] rounded-xl border border-white/5">কোনো পেন্ডিং ডিপোজিট রিকোয়েস্ট নেই।</div>';
+                document.getElementById('liveDepositQueue').innerHTML = html || '<p class="text-center text-slate-500 text-xs">No pending deposits</p>';
             });
 
-            // আউটবাউন্ড উইথড্র রিকোয়েস্ট এবং বাটন লুপ ($ ও BDT রেট ক্যালকুলেটর সহ)
             db.collection("withdraws").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    if(data.status === "pending") {
-                        const dollarAmount = parseFloat(data.amount) || 0;
-                        const bdtAmount = (dollarAmount * 127).toFixed(2);
-                        const timeString = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just Now';
-                        
-                        html += `
-                            <div class="bg-[#0b0f19] border border-blue-500/10 p-3.5 rounded-xl space-y-2.5 shadow-md animate-fade-in">
-                                <div class="flex justify-between items-center border-b border-white/5 pb-1.5">
-                                    <div class="max-w-[60%]">
-                                        <p class="text-[8px] text-slate-500 uppercase font-black">User Node ID</p>
-                                        <p class="text-xs font-bold text-slate-200 truncate">${data.email || 'N/A'}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="block text-[10px] font-black text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">Req: $${dollarAmount}</span>
-                                        <span class="block text-[11px] font-black text-orange-400 mt-0.5">৳ ${bdtAmount}</span>
-                                    </div>
-                                </div>
-                                <div class="bg-[#030712] p-2 rounded-lg font-mono text-[10px] text-slate-400 space-y-0.5">
-                                    <p>Method: <span class="text-white font-bold">${data.gateway || 'bKash'}</span></p>
-                                    <p>Target Acc: <span class="text-blue-400 font-bold select-all">${data.accountNumber || '---'}</span></p>
-                                    <p class="text-[8px] text-slate-600 text-right pt-1"><i class="fa-solid fa-clock"></i> ${timeString}</p>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 pt-0.5">
-                                    <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${dollarAmount}, 'approve')" class="bg-blue-600 text-white font-black text-xs py-2 rounded-lg active:scale-[0.98] transition">Paid (Success)</button>
-                                    <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${dollarAmount}, 'reject')" class="bg-red-950/80 text-red-400 font-bold text-xs py-2 rounded-lg border border-red-500/10 active:scale-[0.98] transition">Reject & Return</button>
-                                </div>
-                            </div>`;
+                    if(data.status === "Pending") {
+                        html += `<div class="bg-[#0b0f19] border border-blue-500/10 p-3.5 rounded-xl">
+                            <p class="text-xs text-slate-200">Acc: ${data.accountNumber}: $${data.amount}</p>
+                            <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${data.amount})" class="w-full bg-blue-600 text-xs py-2 mt-2 rounded-lg font-bold">Paid</button>
+                        </div>`;
                     }
                 });
-                document.getElementById('liveWithdrawQueue').innerHTML = html || '<div class="text-center py-6 text-slate-500 text-xs italic bg-[#0b0f19] rounded-xl border border-white/5">কোনো পেন্ডিং উইথড্র রিকোয়েস্ট নেই।</div>';
-            });
-
-            // লাইভ নম্বর গেটওয়ে ডিফল্ট লোড
-            db.collection("settings").doc("gateways").get().then((doc) => {
-                if(doc.exists) {
-                    document.getElementById('dbBkashNum').value = doc.data().bkash || '';
-                    document.getElementById('dbNagadNum').value = doc.data().nagad || '';
-                }
+                document.getElementById('liveWithdrawQueue').innerHTML = html || '<p class="text-center text-slate-500 text-xs">No pending withdrawals</p>';
             });
         }
 
-        // ==========================================
-        // 🛠️ কোর ডাটা রাইট একশনস
-        // ==========================================
+        function executeDepositAction(docId, uid, amount) {
+            db.collection("deposits").doc(docId).update({ status: "Success" }).then(() => {
+                db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(amount) });
+                Swal.fire({ text: 'সফল!', icon: 'success' });
+            });
+        }
+
+        function executeWithdrawAction(docId, uid, amount) {
+            db.collection("withdraws").doc(docId).update({ status: "Success" }).then(() => {
+                Swal.fire({ text: 'সফল!', icon: 'success' });
+            });
+        }
+
         function saveGatewayNumbers() {
             const bkash = document.getElementById('dbBkashNum').value.trim();
             const nagad = document.getElementById('dbNagadNum').value.trim();
-            db.collection("settings").doc("gateways").set({ bkash: bkash, nagad: nagad }, { merge: true })
-            .then(() => { Swal.fire({ text: 'নম্বর পরিবর্তন করা হয়েছে!', icon: 'success', background: '#0b0f19', color: '#fff' }); });
+            db.collection("settings").doc("gateways").set({ bkash, nagad }, { merge: true }).then(() => Swal.fire({ text: 'সেভ হয়েছে!', icon: 'success' }));
         }
 
         function provisionSubAdmin() {
             const user = document.getElementById('subUser').value.trim();
             const pass = document.getElementById('subPass').value.trim();
-            if(!user || !pass) return;
-
-            db.collection("sub_admins").doc(user).set({ password: pass })
-            .then(() => {
-                Swal.fire({ text: 'সাব-এডমিন একাউন্ট ক্রিয়েট সম্পন্ন!', icon: 'success', background: '#0b0f19', color: '#fff' });
-                document.getElementById('subUser').value = '';
-                document.getElementById('subPass').value = '';
-            });
-        }
-
-        function executeDepositAction(docId, uid, amount, actionType) {
-            if(actionType === 'approve') {
-                db.collection("deposits").doc(docId).update({ status: "success" }).then(() => {
-                    const userRef = db.collection("users").doc(uid);
-                    db.runTransaction(transaction => {
-                        return transaction.get(userRef).then(userDoc => {
-                            let oldBalance = userDoc.exists ? (parseFloat(userDoc.data().balance) || 0) : 0;
-                            let oldInvest = userDoc.exists ? (parseFloat(userDoc.data().totalInvestment) || 0) : 0;
-                            transaction.set(userRef, { 
-                                balance: oldBalance + amount,
-                                totalInvestment: oldInvest + amount 
-                            }, { merge: true });
-                        });
-                    }).then(() => { Swal.fire({ text: 'ডিপোজিট সফলভাবে এপ্রুভ করা হয়েছে!', icon: 'success', background: '#0b0f19', color: '#fff' }); });
-                });
-            } else {
-                db.collection("deposits").doc(docId).update({ status: "failed" }).then(() => {
-                    Swal.fire({ text: 'রিকোয়েস্ট রিজেক্ট করা হয়েছে!', icon: 'success', background: '#0b0f19', color: '#fff' });
-                });
-            }
-        }
-
-        function executeWithdrawAction(docId, uid, amount, actionType) {
-            if(actionType === 'approve') {
-                db.collection("withdraws").doc(docId).update({ status: "success" }).then(() => {
-                    Swal.fire({ text: 'উইথড্র সাকসেসফুল মার্ক করা হয়েছে!', icon: 'success', background: '#0b0f19', color: '#fff' });
-                });
-            } else {
-                db.collection("withdraws").doc(docId).update({ status: "failed" }).then(() => {
-                    const userRef = db.collection("users").doc(uid);
-                    db.runTransaction(transaction => {
-                        return transaction.get(userRef).then(userDoc => {
-                            let oldBalance = userDoc.exists ? (parseFloat(userDoc.data().balance) || 0) : 0;
-                            transaction.set(userRef, { balance: oldBalance + amount }, { merge: true });
-                        });
-                    }).then(() => { Swal.fire({ text: 'রিকোয়েস্ট রিজেক্ট এবং ডলার রিফান্ড করা হয়েছে।', icon: 'success', background: '#0b0f19', color: '#fff' }); });
-                });
-            }
+            db.collection("sub_admins").doc(user).set({ password: pass }).then(() => Swal.fire({ text: 'সাব-এডমিন তৈরি!', icon: 'success' }));
         }
 
         function modifyUserBalancePrompt(uid, currentBal) {
-            Swal.fire({
-                title: 'Modify Balance',
-                input: 'number',
-                inputValue: currentBal,
-                showCancelButton: true,
-                background: '#0b0f19',
-                color: '#fff',
-                confirmButtonColor: '#059669'
-            }).then((result) => {
-                if (result.isConfirmed && result.value !== "") {
-                    db.collection("users").doc(uid).update({ balance: parseFloat(result.value) })
-                    .then(() => { Swal.fire({ text: 'ইউজার ব্যালেন্স মডিফাই সম্পন্ন!', icon: 'success', background: '#0b0f19', color: '#fff' }); });
-                }
+            Swal.fire({ title: 'Modify Balance', input: 'number', inputValue: currentBal, showCancelButton: true, confirmButtonColor: '#059669' }).then((result) => {
+                if (result.isConfirmed) db.collection("users").doc(uid).update({ balance: parseFloat(result.value) }).then(() => Swal.fire({ text: 'আপডেট সফল!', icon: 'success' }));
             });
         }
-    </script><!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a19d043be64d31c34610502/1jpqdb2dg';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
+    </script>
 </body>
 </html>
