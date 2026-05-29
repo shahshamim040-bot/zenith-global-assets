@@ -3,80 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zenith Elite Command Terminal</title>
+    <title>Zenith Command Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
+        body { -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-100 font-sans min-h-screen">
+<body class="bg-[#030712] text-slate-100 font-sans min-h-screen pb-24">
 
-    <div id="authBox" class="fixed inset-0 z-50 flex items-center justify-center bg-[#030712] p-6">
-        <div class="w-full max-w-sm bg-[#0b0f19] p-8 rounded-3xl border border-white/10 text-center">
-            <h2 class="text-xl font-black mb-6 uppercase text-blue-500">Master Authentication</h2>
-            <input type="text" id="adminU" placeholder="Username" class="w-full bg-black p-3 rounded-xl mb-3 border border-slate-700">
-            <input type="password" id="adminP" placeholder="Password" class="w-full bg-black p-3 rounded-xl mb-6 border border-slate-700">
-            <button onclick="login()" class="w-full bg-blue-600 py-3 rounded-xl font-bold uppercase">Initialize</button>
+    <div id="adminAuthScreen" class="flex min-h-screen flex-col justify-center items-center p-6 bg-gradient-to-b from-[#0b0f19] to-[#030712]">
+        <div class="w-full max-w-sm bg-[#0b0f19] border border-white/10 p-5 rounded-2xl shadow-2xl backdrop-blur-lg">
+            <input type="text" id="authAdminUser" placeholder="Terminal ID" class="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-3 mb-3 text-xs text-white outline-none">
+            <input type="password" id="authAdminPass" placeholder="Access Passkey" class="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-3 mb-3 text-xs text-white outline-none">
+            <button onclick="processAdminAuthentication()" class="w-full bg-emerald-600 text-slate-950 py-3 rounded-xl text-xs font-black uppercase">Unlock Console</button>
         </div>
     </div>
 
-    <div id="dash" class="hidden pb-20">
-        <header class="p-4 border-b border-white/10 flex justify-between items-center">
-            <h1 class="font-black text-blue-500">ZENITH COMMAND</h1>
-            <button onclick="location.reload()" class="text-[10px] bg-red-900/30 px-3 py-1 rounded-full">EXIT</button>
+    <div id="adminMainDashboard" class="hidden min-h-screen flex flex-col">
+        <header class="bg-[#0b0f19]/90 border-b border-white/10 p-4 sticky top-0 z-50 flex justify-between items-center backdrop-blur-md">
+            <div>
+                <h1 class="text-xs font-black uppercase text-white">Zenith Terminal</h1>
+                <p class="text-[8px] text-emerald-400 font-mono" id="activeNodeDisplay"></p>
+            </div>
+            <button onclick="location.reload()" class="text-[9px] bg-red-950/40 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg font-black uppercase">Exit</button>
         </header>
 
-        <div class="p-4 space-y-4">
-            <div class="bg-gradient-to-r from-blue-900 to-slate-900 p-6 rounded-2xl text-center">
-                <p class="text-[9px] uppercase font-bold text-slate-400">Total Treasury</p>
-                <h2 id="totalBal" class="text-3xl font-black mt-1">$0.00</h2>
-            </div>
-
-            <div id="tabMembers" class="tab-content active space-y-3">
-                <h3 class="text-xs font-bold text-slate-500 uppercase px-1">Registered Members</h3>
-                <div id="listMembers" class="space-y-3"></div>
-            </div>
-
-            <div id="tabDeposits" class="tab-content space-y-3">
-                <h3 class="text-xs font-bold text-amber-500 uppercase px-1">Deposit Requests</h3>
-                <div id="listDeposits" class="space-y-3"></div>
-            </div>
-
-            <div id="tabWithdraws" class="tab-content space-y-3">
-                <h3 class="text-xs font-bold text-red-500 uppercase px-1">Withdraw Requests</h3>
-                <div id="listWithdraws" class="space-y-3"></div>
-            </div>
-
-            <div id="tabSettings" class="tab-content space-y-3">
-                <input type="text" id="bk" placeholder="bKash Number" class="w-full bg-[#0b0f19] p-3 rounded-lg text-sm border border-white/10">
-                <input type="text" id="ng" placeholder="Nagad Number" class="w-full bg-[#0b0f19] p-3 rounded-lg text-sm border border-white/10">
-                <button onclick="saveGateways()" class="w-full bg-emerald-700 py-3 rounded-lg font-bold text-sm">UPDATE AGENT NUMBERS</button>
+        <div class="p-4 max-w-md mx-auto w-full">
+            <div class="bg-gradient-to-r from-emerald-950/30 to-teal-950/30 border border-emerald-500/20 p-4 rounded-xl text-center shadow-lg">
+                <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest">Company Treasury</p>
+                <h2 class="text-2xl font-black text-emerald-400 mt-1" id="totalCorporateInvestment">$0.00</h2>
             </div>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 bg-[#0b0f19] border-t border-white/10 p-4 flex justify-around">
-            <button onclick="switchTab('tabMembers',this)" class="text-xs font-bold text-blue-500">MEMBERS</button>
-            <button onclick="switchTab('tabDeposits',this)" class="text-xs font-bold text-slate-400">DEPOSIT</button>
-            <button onclick="switchTab('tabWithdraws',this)" class="text-xs font-bold text-slate-400">WITHDRAW</button>
-            <button onclick="switchTab('tabSettings',this)" class="text-xs font-bold text-slate-400">SETTINGS</button>
+        <main class="p-4 max-w-md mx-auto w-full">
+            <div id="tabMembers" class="tab-content active space-y-3">
+                <div id="liveUsersRegistry" class="space-y-3"></div>
+            </div>
+            <div id="tabDeposits" class="tab-content space-y-3">
+                <div id="liveDepositQueue" class="space-y-3"></div>
+            </div>
+            <div id="tabWithdraws" class="tab-content space-y-3">
+                <div id="liveWithdrawQueue" class="space-y-3"></div>
+            </div>
+            <div id="tabSettings" class="tab-content space-y-4">
+                <div class="bg-[#0b0f19] p-4 rounded-xl border border-white/5 space-y-3">
+                    <input type="text" id="dbBkashNum" placeholder="bKash Number" class="w-full bg-[#030712] border border-white/10 rounded-lg p-3 text-xs">
+                    <input type="text" id="dbNagadNum" placeholder="Nagad Number" class="w-full bg-[#030712] border border-white/10 rounded-lg p-3 text-xs">
+                    <button onclick="saveGatewayNumbers()" class="w-full bg-emerald-600 py-3 rounded-lg font-black text-xs text-slate-950 uppercase">Save Agent Numbers</button>
+                </div>
+            </div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-[#0b0f19] border-t border-white/10 h-16 flex justify-around items-center z-50 px-2">
+            <button onclick="switchTab('tabMembers', this)" class="text-emerald-400 font-bold text-[9px]"><i class="fa-solid fa-users block"></i> Members</button>
+            <button onclick="switchTab('tabDeposits', this)" class="text-slate-400 font-bold text-[9px]"><i class="fa-solid fa-circle-down block"></i> Deposits</button>
+            <button onclick="switchTab('tabWithdraws', this)" class="text-slate-400 font-bold text-[9px]"><i class="fa-solid fa-circle-up block"></i> Withdraw</button>
+            <button onclick="switchTab('tabSettings', this)" class="text-slate-400 font-bold text-[9px]"><i class="fa-solid fa-sliders block"></i> Settings</button>
         </nav>
     </div>
 
     <script>
+        const firebaseConfig = { apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjiE0s1ixguBkqVkY", projectId: "zenith-global-assets" };
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        firebase.initializeApp({ apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjiE0s1ixguBkqVkY", projectId: "zenith-global-assets" });
 
-        function login() {
-            if(document.getElementById('adminU').value=="shamim040" && document.getElementById('adminP').value=="12345"){
-                document.getElementById('authBox').classList.add('hidden');
-                document.getElementById('dash').classList.remove('hidden');
-                init();
-            }
+        function processAdminAuthentication() {
+            if(document.getElementById('authAdminUser').value == "shamim040" && document.getElementById('authAdminPass').value == "12345") {
+                document.getElementById('adminAuthScreen').classList.add('hidden');
+                document.getElementById('adminMainDashboard').classList.remove('hidden');
+                runLiveSyncModules();
+            } else { Swal.fire('Error', 'Invalid Admin Access', 'error'); }
         }
 
         function switchTab(id, btn) {
@@ -84,51 +86,70 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function init() {
-            // Load Members
+        function runLiveSyncModules() {
+            // মেম্বার লিস্ট ও টোটাল ব্যালেন্স
             db.collection("users").onSnapshot(s => {
-                let h = "", t = 0;
+                let html = "", total = 0;
                 s.forEach(d => {
                     let u = d.data();
-                    t += (u.totalInvestment || 0);
-                    h += `<div class="bg-[#0b0f19] p-4 rounded-xl border border-white/5 flex justify-between">
-                        <div><p class="text-xs font-bold">${u.email}</p><p class="text-[9px] text-slate-500">Pass: ${u.password}</p></div>
-                        <p class="text-emerald-400 font-bold">$${u.balance}</p>
+                    total += (u.totalInvestment || 0);
+                    html += `<div class="bg-[#0b0f19] p-4 rounded-xl border border-white/10">
+                        <p class="text-[10px] text-slate-400">User: ${u.email}</p>
+                        <p class="text-xs font-bold">Pass: ${u.password} | Balance: $${(u.balance || 0).toFixed(2)}</p>
                     </div>`;
                 });
-                document.getElementById('listMembers').innerHTML = h;
-                document.getElementById('totalBal').innerText = "$"+t.toFixed(2);
+                document.getElementById('liveUsersRegistry').innerHTML = html;
+                document.getElementById('totalCorporateInvestment').innerText = "$"+total.toFixed(2);
             });
 
-            // Load Deposits
-            db.collection("deposits").where("status","==","pending").onSnapshot(s => {
-                let h = "";
+            // ডিপোজিট রিকোয়েস্ট
+            db.collection("deposits").where("status", "==", "pending").onSnapshot(s => {
+                let html = "";
                 s.forEach(d => {
-                    h += `<div class="bg-[#0b0f19] p-4 rounded-xl border-l-4 border-amber-500">
-                        <p class="text-xs font-bold">${d.data().email} : $${d.data().amount}</p>
-                        <button onclick="upd('deposits','${d.id}','success')" class="mt-2 bg-blue-600 px-4 py-1 text-[10px] rounded">APPROVE</button>
+                    let v = d.data();
+                    html += `<div class="bg-[#0b0f19] p-4 rounded-xl border border-amber-500/20">
+                        <p class="text-xs font-bold text-amber-400">${v.email} | Amount: $${v.amount}</p>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="updateAction('deposits','${d.id}','success','${v.uid}',${v.amount})" class="bg-emerald-600 px-3 py-1 rounded text-[9px] font-black">APPROVE</button>
+                            <button onclick="updateAction('deposits','${d.id}','failed','',0)" class="bg-red-900 px-3 py-1 rounded text-[9px] font-black">REJECT</button>
+                        </div>
                     </div>`;
                 });
-                document.getElementById('listDeposits').innerHTML = h;
+                document.getElementById('liveDepositQueue').innerHTML = html;
             });
 
-            // Load Withdraws
-            db.collection("withdraws").where("status","==","pending").onSnapshot(s => {
-                let h = "";
+            // উইথড্র রিকোয়েস্ট
+            db.collection("withdraws").where("status", "==", "pending").onSnapshot(s => {
+                let html = "";
                 s.forEach(d => {
-                    h += `<div class="bg-[#0b0f19] p-4 rounded-xl border-l-4 border-red-500">
-                        <p class="text-xs font-bold">${d.data().email} : $${d.data().amount}</p>
-                        <button onclick="upd('withdraws','${d.id}','success')" class="mt-2 bg-green-600 px-4 py-1 text-[10px] rounded">PAY</button>
+                    let v = d.data();
+                    html += `<div class="bg-[#0b0f19] p-4 rounded-xl border border-blue-500/20">
+                        <p class="text-xs font-bold text-blue-400">${v.email} | Amount: $${v.amount}</p>
+                        <button onclick="updateAction('withdraws','${d.id}','success','',0)" class="bg-blue-600 px-3 py-1 rounded text-[9px] font-black">MARK PAID</button>
                     </div>`;
                 });
-                document.getElementById('listWithdraws').innerHTML = h;
+                document.getElementById('liveWithdrawQueue').innerHTML = html;
             });
         }
 
-        function upd(col, id, s) { db.collection(col).doc(id).update({status: s}).then(() => location.reload()); }
-        function saveGateways() { 
-            db.collection("settings").doc("gateways").set({bkash: document.getElementById('bk').value, nagad: document.getElementById('ng').value}, {merge:true});
-            Swal.fire('Updated', '', 'success');
+        function updateAction(col, id, stat, uid, amt) {
+            db.collection(col).doc(id).update({status: stat}).then(() => {
+                if(stat == 'success' && uid) {
+                    const ref = db.collection("users").doc(uid);
+                    ref.get().then(doc => {
+                        let b = doc.data().balance || 0;
+                        ref.update({balance: b + (col=='deposits'?amt:0)});
+                    });
+                }
+                Swal.fire('Updated', 'Process Successful', 'success');
+            });
+        }
+
+        function saveGatewayNumbers() {
+            db.collection("settings").doc("gateways").set({
+                bkash: document.getElementById('dbBkashNum').value,
+                nagad: document.getElementById('dbNagadNum').value
+            }, {merge:true}).then(() => Swal.fire('Success', 'Gateways Updated', 'success'));
         }
     </script>
 </body>
