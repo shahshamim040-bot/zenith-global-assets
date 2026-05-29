@@ -1,4 +1,6 @@
-// ১. Firebase Config (আপনার অরিজিনাল ক্লাউড কনসোল ও স্ক্রিনশট মিলিয়ে ১০০% ফিক্সড)
+// ==========================================
+// ১. FIREBASE CONFIGURATION & INITIALIZATION
+// ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyC4K_nvbX_KY7dtSUkjIE0s11xgu8KqVkY", 
     authDomain: "zenith-global-assets.firebaseapp.com",
@@ -9,7 +11,6 @@ const firebaseConfig = {
     measurementId: "G-ZNGB5YV218"
 };
 
-// ফায়ারবেস ইনিশিয়ালাইজেশন
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -18,14 +19,33 @@ const db = firebase.firestore();
 
 let currentUser = null;
 let activeGateway = "";
+const USD_TO_BDT_RATE = 127.00; // ১ ডলার = ১২৭ টাকা ফিক্সড গ্লোবাল রেট
 
-// বিকাশ ও নগদ অফিশিয়াল এজেন্ট নাম্বার
 const gatewayNumbers = {
     Bkash: "017XXXXXXXX (bKash Agent)",
     Nagad: "019XXXXXXXX (Nagad Agent)"
 };
 
-// ২. Pro Redirect & Session System
+// ==========================================
+// ২. CUSTOM PREMIUM MINI-SWAL CONFIGURATION
+// ==========================================
+const CustomSwal = Swal.mixin({
+    background: '#020617',
+    color: '#fff',
+    width: '340px', 
+    customClass: {
+        popup: 'border border-white/10 rounded-[1.5rem] shadow-2xl shadow-black',
+        title: 'text-sm font-extrabold tracking-tight uppercase',
+        htmlContainer: 'text-xs text-slate-400 font-medium',
+        confirmButton: 'bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-5 py-2.5 rounded-xl uppercase font-bold tracking-wider transition-all duration-300 outline-none mx-1',
+        cancelButton: 'bg-red-600 hover:bg-red-500 text-white text-xs px-5 py-2.5 rounded-xl uppercase font-bold tracking-wider transition-all duration-300 outline-none mx-1'
+    },
+    buttonsStyling: false
+});
+
+// ==========================================
+// ৩. PRO REDIRECT & SECURE SESSION SYSTEM
+// ==========================================
 auth.onAuthStateChanged(user => {
     const path = window.location.pathname;
     const isDashboard = path.includes('dashboard.html');
@@ -37,12 +57,11 @@ auth.onAuthStateChanged(user => {
         if (!isDashboard) { 
             window.location.href = 'dashboard.html'; 
         } else {
-            // ড্যাশবোর্ডে থাকলে ডাটা, অটো-প্রফিট রান ও হিস্ট্রি লোড হবে
             loadDashboardData(user);
             processDailyYields(user);
             listenToHistoryLog();
+            initLiveCurrencyCalculator(); 
             
-            // ইউজারের একাউন্ট অনুযায়ী ডায়নামিক রেফারেল লিংক জেনারেট
             const currentDomain = window.location.origin;
             if(document.getElementById('refLinkText')) {
                 document.getElementById('refLinkText').innerText = `${currentDomain}/register.html?ref=${user.uid}`;
@@ -51,7 +70,27 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// ৩. Login Logic
+// ==========================================
+// ৪. LIVE EXCHANGE MATRIX CALCULATOR (BDT/USD)
+// ==========================================
+function initLiveCurrencyCalculator() {
+    const usdInput = document.getElementById('usdAmount');
+    const bdtDisplay = document.getElementById('totalBdtDisplay'); 
+
+    if (usdInput) {
+        usdInput.addEventListener('input', (e) => {
+            const usdValue = parseFloat(e.target.value) || 0;
+            const convertedBdt = (usdValue * USD_TO_BDT_RATE).toFixed(2);
+            if (bdtDisplay) {
+                bdtDisplay.innerText = `${convertedBdt} BDT`;
+            }
+        });
+    }
+}
+
+// ==========================================
+// ৫. SECURE LOGIN SYSTEM
+// ==========================================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
@@ -60,20 +99,18 @@ if (loginForm) {
         auth.signInWithEmailAndPassword(inputs[0].value, inputs[1].value)
             .then(() => { window.location.href = "dashboard.html"; })
             .catch(err => {
-                Swal.fire({
+                CustomSwal.fire({
                     icon: 'error',
                     title: 'Access Denied',
-                    text: err.message,
-                    background: '#020617',
-                    color: '#fff',
-                    confirmButtonColor: '#ef4444',
-                    confirmButtonText: 'Try Again'
+                    text: err.message
                 });
             });
     });
 }
 
-// ৪. Registration Logic + Referral Bonus Check
+// ==========================================
+// ৬. REGISTRATION ENGINE & REFERRAL LOCK
+// ==========================================
 const regForm = document.getElementById('registerForm');
 if(regForm) {
     regForm.addEventListener('submit', (e) => {
@@ -82,67 +119,61 @@ if(regForm) {
         const refUID = inputs[3].value.trim() || "none";
 
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
-            // নতুন ইউজারের ৩টি আলাদা ব্যালেন্সসহ ডকুমেন্ট তৈরি
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
-                balance: 0.00,          // মেইন ব্যালেন্স
-                earningBalance: 0.00,   // আর্নিং ব্যালেন্স (দৈনিক প্রফিট)
-                activeInvestment: 0.00, // একটিভ ইনভেস্টমেন্ট
+                balance: 0.00,
+                earningBalance: 0.00,
+                activeInvestment: 0.00,
                 purchasedCount: 0,
                 refBy: refUID,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                // রেফারেল কোড থাকলে আমন্ত্রণকারীর মেইন ব্যালেন্সে $3.00 ডলার অটো অ্যাড হবে
                 if (refUID !== "none") {
                     return db.collection('users').doc(refUID).update({
                         balance: firebase.firestore.FieldValue.increment(3.00)
-                    }).catch(err => console.log("Referral crediting skipped:", err));
+                    }).catch(err => console.log("Referral transaction skipped:", err));
                 }
             });
         }).then(() => {
             auth.signOut().then(() => {
-                Swal.fire({
+                CustomSwal.fire({
                     icon: 'success',
                     title: 'Account Verified',
-                    text: 'Account verified successfully! Please log in to proceed.',
-                    background: '#020617',
-                    color: '#fff',
-                    confirmButtonColor: '#10b981',
-                    confirmButtonText: 'Log In'
+                    text: 'Verification successful! Please sign in using your credentials.'
                 }).then(() => {
                     window.location.href = 'index.html';
                 });
             });
         }).catch(err => {
-            Swal.fire({
+            CustomSwal.fire({
                 icon: 'error',
                 title: 'System Error',
-                text: err.message,
-                background: '#020617',
-                color: '#fff',
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'OK'
+                text: err.message
             });
         });
     });
 }
 
-// ৫. Load Data (Real-time 3-Balance Sync for Dashboard)
+// ==========================================
+// ৭. REAL-TIME THREE-BALANCE SYNCHRONIZER
+// ==========================================
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
         const data = doc.data();
         if(data) {
             if(document.getElementById('userBalance')) document.getElementById('userBalance').innerText = parseFloat(data.balance || 0).toFixed(2);
             if(document.getElementById('earningBalance')) document.getElementById('earningBalance').innerText = parseFloat(data.earningBalance || 0).toFixed(2);
-            if(document.getElementById('userName')) document.getElementById('userName').innerText = data.fullName || "VIP User";
+            if(document.getElementById('userName')) document.getElementById('userName').innerText = data.fullName || "VIP Operator";
             if(document.getElementById('activeInvest')) document.getElementById('activeInvest').innerText = parseFloat(data.activeInvestment || 0).toFixed(2);
             if(document.getElementById('purchasedCount')) document.getElementById('purchasedCount').innerText = data.purchasedCount || 0;
         }
     });
 }
 
-// ৬. ২৪ ঘণ্টা পর পর অটোমেটিক দৈনিক লাভ (Daily Yield) অ্যাড করার প্রসেস
+// ==========================================
+// ৮. HIGH-FREQUENCY DAILY YIELD ENGINE (AUTO-PROFIT)
+// ==========================================
 function processDailyYields(user) {
     const now = new Date().getTime();
     
@@ -182,23 +213,23 @@ function processDailyYields(user) {
     });
 }
 
-// ७. Referral Link Copy Function
+// ==========================================
+// ৯. CLONE REFERRAL TO CLIPBOARD
+// ==========================================
 function copyReferral() {
     const linkText = document.getElementById('refLinkText').innerText;
     navigator.clipboard.writeText(linkText).then(() => {
-        Swal.fire({
+        CustomSwal.fire({
             icon: 'success',
             title: 'Cloned!',
-            text: 'Referral Link Successfully Cloned to Clipboard!',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Awesome'
+            text: 'Referral architecture cloned successfully!'
         });
     });
 }
 
-// ৮. Deposit Gateway Action & Mandatory Inputs Validation (পেন্ডিং লজিকসহ)
+// ==========================================
+// ১০. ASSET DEPOSIT GATEWAY TERMINAL
+// ==========================================
 function openGateway(gateway) {
     activeGateway = gateway;
     document.getElementById('gatewayTitle').innerText = gateway;
@@ -213,35 +244,35 @@ function submitDeposit() {
     const screenshotFile = document.getElementById('screenshot').files[0];
 
     if (!usdAmount || usdAmount <= 0) { 
-        Swal.fire({ icon: 'warning', title: 'Invalid Input', text: 'Please specify a valid Allocation Value (USD).', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
+        CustomSwal.fire({ icon: 'warning', title: 'Invalid Matrix', text: 'Please specify a valid Allocation Value (USD).' });
         return; 
     }
     if (!senderNum) { 
-        Swal.fire({ icon: 'warning', title: 'Missing Number', text: 'Sender Account Number is mandatory.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
+        CustomSwal.fire({ icon: 'warning', title: 'Data Missing', text: 'Origin Terminal Account Identifier is mandatory.' });
         return; 
     }
     if (!trxId) { 
-        Swal.fire({ icon: 'warning', title: 'Missing TrxID', text: 'Transaction Structure ID (TrxID) is mandatory.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
+        CustomSwal.fire({ icon: 'warning', title: 'Data Missing', text: 'Transaction Ledger Signature (TrxID) is mandatory.' });
         return; 
     }
     if (!screenshotFile) { 
-        Swal.fire({ icon: 'warning', title: 'Screenshot Required', text: 'You must upload a Transfer Confirmation Screen Capture.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
+        CustomSwal.fire({ icon: 'warning', title: 'Capture Missing', text: 'Transfer Screen Capture proof is mandatory.' });
         return; 
     }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = "Transmitting Packet Node...";
+    btn.innerText = "Transmitting Packet...";
 
     const screenshotName = `${Date.now()}_${screenshotFile.name}`;
+    const targetBdtValue = (usdAmount * USD_TO_BDT_RATE).toFixed(2);
 
-    // ডিফল্ট স্ট্যাটাস "Pending" থাকবে, যা এডমিন প্যানেল থেকে এপ্রুভ করার সাথে সাথে লাইভ সাক্সেস শো করবে
     const depositPayload = {
         userId: currentUser.uid,
         userEmail: currentUser.email,
         userName: document.getElementById('userName').innerText,
         amount: usdAmount,
-        bdtValue: (usdAmount * 127).toFixed(2),
+        bdtValue: targetBdtValue,
         gateway: activeGateway,
         senderNumber: senderNum,
         transactionId: trxId,
@@ -253,22 +284,20 @@ function submitDeposit() {
 
     db.collection("transactions").add(depositPayload)
     .then(() => {
-        Swal.fire({
+        CustomSwal.fire({
             icon: 'warning',
             title: 'Deposit Committed',
-            text: 'Deposit Packet Committed Successfully! Awaiting Admin Node Verification.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981'
+            text: 'Asset Packet Committed Successfully! Awaiting Admin Node Verification.'
         });
         document.getElementById('usdAmount').value = "";
         document.getElementById('senderNum').value = "";
         document.getElementById('trxId').value = "";
         document.getElementById('screenshot').value = "";
         document.getElementById('paymentBox').classList.add('hidden');
+        if(document.getElementById('totalBdtDisplay')) document.getElementById('totalBdtDisplay').innerText = "0.00 BDT";
     })
     .catch(error => {
-        Swal.fire({ icon: 'error', title: 'Transmission Error', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
+        CustomSwal.fire({ icon: 'error', title: 'Transmission Error', text: error.message });
     })
     .finally(() => {
         btn.disabled = false;
@@ -276,7 +305,9 @@ function submitDeposit() {
     });
 }
 
-// ৯. Withdrawal Handling (পেন্ডিং ও অটো ব্যালেন্স ডিডাকশন)
+// ==========================================
+// ১১. ASSET DISINVESTMENT CORE (WITHDRAWAL)
+// ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const gateway = document.getElementById('withdrawGateway').value;
@@ -287,19 +318,18 @@ function processWithdrawal() {
     const currentBalance = parseFloat(document.getElementById(balanceId).innerText);
 
     if (!amount || amount < 20) { 
-        Swal.fire({ icon: 'error', title: 'Limit Restriction', text: 'Error: Minimum asset threshold for disinvestment is $20.00 USD.', background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
+        CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Minimum disinvestment threshold limit is $20.00 USD.' });
         return; 
     }
     if (!account) { 
-        Swal.fire({ icon: 'warning', title: 'Blank Terminal', text: 'Receiving Terminal Number cannot be left blank.', background: '#020617', color: '#fff', confirmButtonColor: '#10b981' });
+        CustomSwal.fire({ icon: 'warning', title: 'Data Missing', text: 'Receiving Node Address cannot be left blank.' });
         return; 
     }
     if (amount > currentBalance) { 
-        Swal.fire({ icon: 'error', title: 'Insufficient Balance', text: `Error: Insufficient capital matrix in selected ${source === 'earning' ? 'Earning' : 'Main'} Balance.`, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
+        CustomSwal.fire({ icon: 'error', title: 'Asset Deficit', text: `Insufficient credit matrix in the selected operational balance.` });
         return; 
     }
 
-    // উইথড্র সাবমিট করলেই স্ট্যাটাস "Pending" হিসেবে ডাটাবেজে লক হবে
     const withdrawPayload = {
         userId: currentUser.uid,
         userEmail: currentUser.email,
@@ -319,53 +349,41 @@ function processWithdrawal() {
         return db.collection("users").doc(currentUser.uid).update(updateField);
     })
     .then(() => {
-        Swal.fire({
+        CustomSwal.fire({
             icon: 'warning',
             title: 'Pipeline Deployed',
-            text: 'Disinvestment Pipeline Deployed! Liquidation processing is currently Pending.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981'
+            text: 'Disinvestment Pipeline Deployed! Liquidation matrix is currently Pending.'
         });
         document.getElementById('withdrawAmount').value = "";
         document.getElementById('withdrawAccount').value = "";
     })
     .catch(error => {
-        Swal.fire({ icon: 'error', title: 'Liquidation Interruption', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
+        CustomSwal.fire({ icon: 'error', title: 'Pipeline Interruption', text: error.message });
     });
 }
 
-// ১০. Deploy Node Packages (ডাবল-কনফার্মেশন ও সাক্সেস লগো মেসেজ)
+// ==========================================
+// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX
+// ==========================================
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
 
     if (currentBalance < cost) {
-        Swal.fire({
+        CustomSwal.fire({
             icon: 'error',
-            title: 'ব্যালেন্স অপর্যাপ্ত!',
-            text: 'Insufficient Node Deployment Capital. Please fund your main balance desk first.',
-            background: '#020617',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Fund Balance'
-        }).then(() => {
-            switchTab('deposit');
+            title: 'Asset Deficit',
+            text: 'Insufficient Node Deployment Capital. Please fund your main desk terminal first.'
         });
         return;
     }
 
-    // প্ল্যান কিনার আগের ইন্টারক্টিভ কনফার্মেশন ডায়ালগ
-    Swal.fire({
-        title: 'Confirm Deployment',
+    CustomSwal.fire({
+        title: 'Confirm Node',
         text: `Confirm deployment of ${planName} for $${cost.toFixed(2)} USD?`,
         icon: 'question',
         showCancelButton: true,
-        background: '#020617',
-        color: '#fff',
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#ef4444',
-        confirmButtonText: 'Yes, Deploy Node',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: 'Deploy',
+        cancelButtonText: 'Abort'
     }).then((result) => {
         if (result.isConfirmed) {
             const dailyProfit = cost * rate;
@@ -403,24 +421,22 @@ function buyPlan(cost, days, rate, planName) {
                 });
             })
             .then(() => {
-                // সাক্সেসফুলি কেনা হয়ে গেলে সুন্দর অ্যানিমেটেড সবুজ টিকমার্ক মেসেজ
-                Swal.fire({ 
+                CustomSwal.fire({ 
                     icon: 'success', 
-                    title: 'Deployed Successfully', 
-                    text: `${planName} Deployed Successfully! Computational node is now running.`, 
-                    background: '#020617', 
-                    color: '#fff', 
-                    confirmButtonColor: '#10b981' 
+                    title: 'Active Node', 
+                    text: `${planName} Node deployed successfully into the ecosystem.` 
                 });
             })
             .catch(error => {
-                Swal.fire({ icon: 'error', title: 'Deployment Aborted', text: error.message, background: '#020617', color: '#fff', confirmButtonColor: '#ef4444' });
+                CustomSwal.fire({ icon: 'error', title: 'Deployment Aborted', text: error.message });
             });
         }
     });
 }
 
-// ১১. Real-Time Audit Log History Synchronization (লাইভ স্ট্যাটাস ব্যাজ ডিজাইন)
+// ==========================================
+// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS
+// ==========================================
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
@@ -440,7 +456,6 @@ function listenToHistoryLog() {
             const log = doc.data();
             let statusBadge = "";
 
-            // পেন্ডিং থাকলে হলুদ অ্যানিমেটেড পালস এবং এডমিন এপ্রুভ করলে অটোমেটিক সবুজ সাক্সেস লগো শো হবে
             if (log.status === "Pending") {
                 statusBadge = `<span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] uppercase animate-pulse">Pending</span>`;
             } else if (log.status === "Approved" || log.status === "Success") {
@@ -473,7 +488,9 @@ function listenToHistoryLog() {
     });
 }
 
-// ১২. Logout Function
+// ==========================================
+// ১৪. SYSTEM LOGOUT RUNTIME
+// ==========================================
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
-                  }
+}
