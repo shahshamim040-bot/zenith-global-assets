@@ -115,6 +115,19 @@ if(regForm) {
         const refUID = inputs[3].value.trim() || "none";
 
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
+            // রেফারেল বোনাস লজিক
+            if (refUID !== "none") {
+                db.collection('users').doc(refUID).update({
+                    balance: firebase.firestore.FieldValue.increment(2) // ২ ডলার বোনাস
+                });
+                db.collection('transactions').add({
+                    userId: refUID,
+                    type: "Referral Bonus",
+                    amount: 2,
+                    status: "Success",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
@@ -244,11 +257,11 @@ function processWithdrawal() {
         return;
     }
     if (amount > currentBal) {
-        CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'আপনার ব্যালেন্স নাই!' });
+        CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'আপনার পর্যাপ্ত ব্যালেন্স নাই!' });
         return;
     }
 
-    const finalAmount = amount - 1; // ১ ডলার চার্জ
+    const finalAmount = amount - 1; // ১ ডলার চার্জ কেটে বাকিটা প্রসেস
 
     db.collection("withdraws").add({
         userId: currentUser.uid,
@@ -267,6 +280,7 @@ function processWithdrawal() {
             status: "Pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+        
         CustomSwal.fire({ icon: 'success', title: 'Pipeline Deployed', text: 'উইথড্র রিকোয়েস্ট সফল! ১ ডলার চার্জ কাটা হয়েছে।' });
     });
 }
@@ -277,9 +291,9 @@ function processWithdrawal() {
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
     
-    // ব্যালেন্স চেক
+    // স্মার্ট ব্যালেন্স চেক
     if (currentBalance < cost) {
-        CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'আপনার ব্যালেন্স নাই!' });
+        CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'আপনার ব্যালেন্স নাই! আগে ডলার এড করুন।' });
         return;
     }
 
@@ -295,7 +309,8 @@ function buyPlan(cost, days, rate, planName) {
     db.collection("active_nodes").add(nodePayload).then(() => {
         db.collection("users").doc(currentUser.uid).update({
             balance: firebase.firestore.FieldValue.increment(-cost),
-            activeInvestment: firebase.firestore.FieldValue.increment(cost)
+            activeInvestment: firebase.firestore.FieldValue.increment(cost),
+            purchasedCount: firebase.firestore.FieldValue.increment(1) // প্ল্যান কাউন্ট আপডেট
         });
         
         db.collection("transactions").add({
@@ -306,7 +321,7 @@ function buyPlan(cost, days, rate, planName) {
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'Node deployed successfully.' });
+        CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'প্ল্যানটি সফলভাবে কেনা হয়েছে।' });
     });
 }
 
@@ -317,19 +332,26 @@ function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
 
-    db.collection("transactions").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").onSnapshot(snapshot => {
-        tableBody.innerHTML = ""; 
-        snapshot.forEach(doc => {
-            const log = doc.data();
-            const color = log.status === "Success" ? "text-emerald-400" : (log.status === "Pending" ? "text-amber-400" : "text-blue-400");
-            tableBody.innerHTML += `
-            <tr class="border-b border-white/5">
-                <td class="p-3 text-xs">${log.type}</td>
-                <td class="p-3 text-xs">$${log.amount || log.cost || 0}</td>
-                <td class="p-3 text-xs ${color}">${log.status}</td>
-            </tr>`;
+    db.collection("transactions")
+        .where("userId", "==", currentUser.uid)
+        .orderBy("timestamp", "desc")
+        .onSnapshot(snapshot => {
+            tableBody.innerHTML = ""; 
+            snapshot.forEach(doc => {
+                const log = doc.data();
+                // স্ট্যাটাস অনুযায়ী কালার কোড
+                let color = "text-blue-400";
+                if(log.status === "Success") color = "text-emerald-400";
+                if(log.status === "Pending") color = "text-amber-400";
+
+                tableBody.innerHTML += `
+                <tr class="border-b border-white/5">
+                    <td class="p-3 text-xs">${log.type}</td>
+                    <td class="p-3 text-xs">$${log.amount || 0}</td>
+                    <td class="p-3 text-xs ${color}">${log.status}</td>
+                </tr>`;
+            });
         });
-    });
 }
 
 // ==========================================
