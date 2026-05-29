@@ -116,8 +116,16 @@ if(regForm) {
 
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
             if (refUID !== "none") {
-                db.collection('users').doc(refUID).update({ balance: firebase.firestore.FieldValue.increment(2) });
-                db.collection('transactions').add({ userId: refUID, type: "Referral Bonus", amount: 2, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                db.collection('users').doc(refUID).update({
+                    balance: firebase.firestore.FieldValue.increment(2)
+                });
+                db.collection('transactions').add({
+                    userId: refUID,
+                    type: "Referral Bonus",
+                    amount: 2,
+                    status: "Success",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
@@ -205,7 +213,7 @@ function submitDeposit() {
     const trxId = document.getElementById('trxId').value.trim();
 
     if (!usdAmount || usdAmount <= 0 || !trxId) { 
-        CustomSwal.fire({ icon: 'error', title: 'Action Required', text: 'Please fill all details correctly.' });
+        CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Please fill all fields!' });
         return; 
     }
 
@@ -216,13 +224,13 @@ function submitDeposit() {
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Verification.' });
+        CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Node Verification.' });
         document.getElementById('paymentBox').classList.add('hidden');
     });
 }
 
 // ==========================================
-// ১১. ASSET DISINVESTMENT CORE (Updated)
+// ১১. ASSET DISINVESTMENT CORE
 // ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -230,35 +238,23 @@ function processWithdrawal() {
     const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
     const currentBal = parseFloat(document.getElementById('userBalance').innerText);
     
-    if (amount < 20) { CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Minimum withdrawal is $20.' }); return; }
+    if (amount < 20) { CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Min withdrawal $20!' }); return; }
+    if (!account) { CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Account number is required!' }); return; }
     if (amount > currentBal) { CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'Insufficient balance!' }); return; }
-    if (!account) { CustomSwal.fire({ icon: 'error', title: 'Missing Info', text: 'Please enter account number.' }); return; }
 
-    const finalAmount = amount - 1; 
-
-    db.collection("withdraws").add({
+    db.collection("transactions").add({
         userId: currentUser.uid,
-        amount: finalAmount,
-        gateway: gateway,
-        accountNumber: account,
-        status: "Pending", 
-        type: "Withdrawal",
+        type: "Withdrawal (" + gateway + ")",
+        amount: amount,
+        status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        db.collection("users").doc(currentUser.uid).update({ balance: firebase.firestore.FieldValue.increment(-amount) });
-        db.collection("transactions").add({
-            userId: currentUser.uid,
-            type: "Withdrawal (" + gateway + ")",
-            amount: amount,
-            status: "Pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        CustomSwal.fire({ icon: 'success', title: 'Request Sent', text: 'Withdrawal under review.' });
+        CustomSwal.fire({ icon: 'success', title: 'Pipeline Deployed', text: 'Withdrawal request under review.' });
     });
 }
 
 // ==========================================
-// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX (Updated)
+// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX
 // ==========================================
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
@@ -290,7 +286,7 @@ function buyPlan(cost, days, rate, planName) {
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        CustomSwal.fire({ icon: 'success', title: 'Node Active', text: 'Node deployed successfully.' });
+        CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'Node deployed successfully.' });
     });
 }
 
@@ -301,26 +297,28 @@ function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
     if(!tableBody) return;
 
+    // হিস্ট্রি ফিক্স করার জন্য আমরা orderBy সরিয়ে snapshot লজিক ব্যবহার করছি
     db.collection("transactions")
-      .where("userId", "==", currentUser.uid)
-      .orderBy("timestamp", "desc")
-      .onSnapshot(snapshot => {
-        tableBody.innerHTML = ""; 
-        snapshot.forEach(doc => {
-            const log = doc.data();
-            let color = log.status === "Success" ? "text-emerald-400" : (log.status === "Pending" ? "text-amber-400" : "text-blue-400");
-            tableBody.innerHTML += `
-            <tr class="border-b border-white/5">
-                <td class="p-3 text-xs">${log.type}</td>
-                <td class="p-3 text-xs">$${log.amount || 0}</td>
-                <td class="p-3 text-xs ${color} font-bold">${log.status}</td>
-            </tr>`;
+        .where("userId", "==", currentUser.uid)
+        .onSnapshot(snapshot => {
+            tableBody.innerHTML = ""; 
+            // ক্লায়েন্ট সাইডে সর্ট করে হিস্ট্রি দেখাবো
+            const docs = snapshot.docs.sort((a,b) => b.data().timestamp - a.data().timestamp);
+            docs.forEach(doc => {
+                const log = doc.data();
+                let color = log.status === "Success" ? "text-emerald-400" : (log.status === "Pending" ? "text-amber-400" : "text-blue-400");
+                tableBody.innerHTML += `
+                <tr class="border-b border-white/5">
+                    <td class="p-3 text-xs">${log.type}</td>
+                    <td class="p-3 text-xs">$${log.amount || 0}</td>
+                    <td class="p-3 text-xs ${color} font-bold">${log.status}</td>
+                </tr>`;
+            });
         });
-    });
 }
 
 // ==========================================
-// ১৪. SYSTEM LOGOUT RUNTIME
+// ১৪. SYSTEM LOGOUT
 // ==========================================
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
