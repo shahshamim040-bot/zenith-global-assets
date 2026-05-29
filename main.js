@@ -185,7 +185,7 @@ function copyReferral() {
 }
 
 // ==========================================
-// ১০. ASSET DEPOSIT GATEWAY (সংশোধিত)
+// ১০. ASSET DEPOSIT GATEWAY
 // ==========================================
 function openGateway(gateway) {
     activeGateway = gateway;
@@ -213,32 +213,49 @@ function submitDeposit() {
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    db.collection("deposits").add(depositPayload)
-    .then(() => {
+    db.collection("deposits").add(depositPayload).then(() => {
+        // হিস্ট্রিতে পেন্ডিং এন্ট্রি যোগ করা হচ্ছে
+        db.collection("transactions").add({
+            userId: currentUser.uid,
+            type: "Deposit (" + activeGateway + ")",
+            amount: usdAmount,
+            status: "Pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
         CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Node Verification.' });
         document.getElementById('paymentBox').classList.add('hidden');
     });
 }
 
 // ==========================================
-// ১১. ASSET DISINVESTMENT CORE (সংশোধিত)
+// ১১. ASSET DISINVESTMENT CORE
 // ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const account = document.getElementById('withdrawAccount').value.trim();
+    const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
     
     const withdrawPayload = {
         userId: currentUser.uid,
         amount: amount,
-        gateway: document.getElementById('withdrawGateway').value.toUpperCase(),
+        gateway: gateway,
         accountNumber: account,
         status: "Pending", 
         type: "Withdrawal",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    db.collection("withdraws").add(withdrawPayload)
-    .then(() => {
+    db.collection("withdraws").add(withdrawPayload).then(() => {
+        // উইথড্রল হিস্ট্রিতে এন্ট্রি
+        db.collection("transactions").add({
+            userId: currentUser.uid,
+            type: "Withdrawal (" + gateway + ")",
+            amount: amount,
+            status: "Pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
         CustomSwal.fire({ icon: 'warning', title: 'Pipeline Deployed', text: 'Withdrawal Pending.' });
     });
 }
@@ -264,6 +281,16 @@ function buyPlan(cost, days, rate, planName) {
             balance: firebase.firestore.FieldValue.increment(-cost),
             activeInvestment: firebase.firestore.FieldValue.increment(cost)
         });
+        
+        // ইনভেস্টমেন্ট হিস্ট্রি
+        db.collection("transactions").add({
+            userId: currentUser.uid,
+            type: "Investment: " + planName,
+            cost: cost,
+            status: "Active",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
         CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'Node deployed successfully.' });
     });
 }
@@ -279,7 +306,13 @@ function listenToHistoryLog() {
         tableBody.innerHTML = ""; 
         snapshot.forEach(doc => {
             const log = doc.data();
-            tableBody.innerHTML += `<tr><td class="p-3">${log.type}</td><td class="p-3">$${log.amount || log.cost}</td><td class="p-3">${log.status}</td></tr>`;
+            const color = log.status === "Success" ? "text-emerald-400" : (log.status === "Pending" ? "text-amber-400" : "text-blue-400");
+            tableBody.innerHTML += `
+            <tr class="border-b border-white/5">
+                <td class="p-3 text-xs">${log.type}</td>
+                <td class="p-3 text-xs">$${log.amount || log.cost || 0}</td>
+                <td class="p-3 text-xs ${color}">${log.status}</td>
+            </tr>`;
         });
     });
 }
@@ -292,7 +325,7 @@ function logout() {
 }
 
 // ==========================================
-// ১৫. REAL-TIME GATEWAY SYNC (এডমিন থেকে নাম্বার আপডেট সিঙ্ক)
+// ১৫. REAL-TIME GATEWAY SYNC
 // ==========================================
 db.collection("settings").doc("gateways").onSnapshot(doc => {
     if (doc.exists) {
