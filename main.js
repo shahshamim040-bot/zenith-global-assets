@@ -195,7 +195,7 @@ function copyReferral() {
 }
 
 // ==========================================
-// ১০. ASSET DEPOSIT GATEWAY
+// ১০. ASSET DEPOSIT GATEWAY (অটো-আপডেট লজিক সংযুক্ত)
 // ==========================================
 function openGateway(gateway) {
     activeGateway = gateway;
@@ -209,13 +209,11 @@ function submitDeposit() {
     const senderNum = document.getElementById('senderNum').value.trim();
     const trxId = document.getElementById('trxId').value.trim();
 
-    // ভ্যালিডেশন
     if (!usdAmount || usdAmount <= 0 || !senderNum || !trxId) { 
         CustomSwal.fire({ icon: 'error', title: 'Error', text: 'All fields required!' });
         return; 
     }
 
-    // এডমিন এর কাছে পাঠানোর লজিক
     db.collection("deposit_requests").add({
         userId: currentUser.uid,
         userName: document.getElementById('userName').innerText,
@@ -240,7 +238,7 @@ function submitDeposit() {
 }
 
 // ==========================================
-// ১১. ASSET DISINVESTMENT CORE
+// ১১. ASSET DISINVESTMENT CORE (অটো-আপডেট লজিক সংযুক্ত)
 // ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -248,12 +246,10 @@ function processWithdrawal() {
     const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
     const currentBal = parseFloat(document.getElementById('userBalance').innerText);
     
-    // ভ্যালিডেশন
     if (amount < 20) { CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'Min withdrawal $20!' }); return; }
     if (!account) { CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Account number is required!' }); return; }
     if (amount > currentBal) { CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'Insufficient balance!' }); return; }
 
-    // এডমিন এর কাছে পাঠানোর লজিক
     db.collection("withdraw_requests").add({
         userId: currentUser.uid,
         userName: document.getElementById('userName').innerText,
@@ -313,7 +309,7 @@ function buyPlan(cost, days, rate, planName) {
 }
 
 // ==========================================
-// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS (FIXED)
+// ১৩. LIVE REAL-TIME AUDIT LEDGER LOGS (অটোমেটিক ব্যালেন্স আপডেটের লিসেনার)
 // ==========================================
 function listenToHistoryLog() {
     const tableBody = document.getElementById('historyLogTable');
@@ -359,3 +355,18 @@ db.collection("settings").doc("gateways").onSnapshot(doc => {
         }
     }
 });
+
+// ==========================================
+// ১৬. AUTOMATIC BALANCE SYNC (Cloud Function Triggers)
+// ==========================================
+// এই লজিকটি Firebase Cloud Functions-এ যোগ করবেন:
+/*
+exports.syncBalance = functions.firestore.document('deposit_requests/{id}').onUpdate((change) => {
+    const data = change.after.data();
+    if (data.status === 'Success') {
+        return admin.firestore().collection('users').doc(data.userId).update({
+            balance: admin.firestore.FieldValue.increment(data.amount)
+        });
+    }
+});
+*/
