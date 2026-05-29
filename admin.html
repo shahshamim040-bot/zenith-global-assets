@@ -162,7 +162,6 @@
             const currentAdminSession = localStorage.getItem("activeAdminToken");
             if (currentAdminSession) { initializeSecureConsole(currentAdminSession); }
             
-            // গেটওয়ে নাম্বার লোড করা
             db.collection("settings").doc("gateways").onSnapshot(doc => {
                 if(doc.exists) {
                     document.getElementById('dbBkashNum').value = doc.data().bkash || '';
@@ -228,7 +227,6 @@
                 document.getElementById('liveUsersRegistry').innerHTML = usersHtml;
             });
 
-            // ডিপোজিট কিউ সংশোধন - ট্রানজেকশন আইডি এবং নাম্বার শো করার জন্য
             db.collection("deposits").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let html = "";
                 snapshot.forEach(doc => {
@@ -236,11 +234,12 @@
                     if(data.status === "Pending") {
                         html += `<div class="bg-[#0b0f19] border border-amber-500/10 p-3.5 rounded-xl space-y-1">
                             <p class="text-[10px] text-slate-400">User: ${data.email || 'N/A'}</p>
+                            <p class="text-xs font-bold text-emerald-400">Gateway: ${data.gateway}</p>
                             <p class="text-xs font-bold">TrxID: ${data.transactionId || 'N/A'}</p>
                             <p class="text-xs font-bold text-amber-400">Number: ${data.senderNumber || 'N/A'}</p>
                             <p class="text-xs text-white">Amount: $${data.amount}</p>
                             <div class="grid grid-cols-2 gap-2 mt-2">
-                                <button onclick="executeDepositAction('${doc.id}', '${data.uid}', ${data.amount})" class="bg-emerald-600 text-xs py-1.5 rounded font-bold">Approve</button>
+                                <button onclick="executeDepositAction('${doc.id}', '${data.userId}', ${data.amount}, '${data.gateway}', '${data.transactionId}')" class="bg-emerald-600 text-xs py-1.5 rounded font-bold">Approve</button>
                                 <button onclick="rejectAction('deposits', '${doc.id}')" class="bg-red-900 text-xs py-1.5 rounded font-bold">Reject</button>
                             </div>
                         </div>`;
@@ -264,10 +263,17 @@
             });
         }
 
-        function executeDepositAction(docId, uid, amount) {
+        function executeDepositAction(docId, uid, amount, gateway, trxId) {
             db.collection("deposits").doc(docId).update({ status: "Success" }).then(() => {
                 db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(amount) });
-                Swal.fire({ text: 'সফলভাবে এপ্রুভ হয়েছে!', icon: 'success' });
+                db.collection("transactions").add({
+                    userId: uid,
+                    type: "Deposit (" + gateway + ")",
+                    amount: amount,
+                    status: "Success",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                Swal.fire({ text: 'সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্সে যোগ হয়েছে!', icon: 'success' });
             });
         }
 
