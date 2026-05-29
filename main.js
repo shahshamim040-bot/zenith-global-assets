@@ -138,7 +138,7 @@ if(regForm) {
 }
 
 // ==========================================
-// ७. REAL-TIME THREE-BALANCE SYNCHRONIZER
+// ৭. REAL-TIME THREE-BALANCE SYNCHRONIZER
 // ==========================================
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
@@ -208,12 +208,11 @@ function submitDeposit() {
         gateway: activeGateway,
         senderNumber: senderNum,
         transactionId: trxId,
-        status: "Pending", // বড় হাতের P নিশ্চিত করা হয়েছে
+        status: "Pending", 
         type: "Deposit",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // কালেকশন নাম 'deposits' রাখা হয়েছে
     db.collection("deposits").add(depositPayload)
     .then(() => {
         CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Node Verification.' });
@@ -233,12 +232,11 @@ function processWithdrawal() {
         amount: amount,
         gateway: document.getElementById('withdrawGateway').value.toUpperCase(),
         accountNumber: account,
-        status: "Pending", // বড় হাতের P নিশ্চিত করা হয়েছে
+        status: "Pending", 
         type: "Withdrawal",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // কালেকশন নাম 'withdraws' রাখা হয়েছে
     db.collection("withdraws").add(withdrawPayload)
     .then(() => {
         CustomSwal.fire({ icon: 'warning', title: 'Pipeline Deployed', text: 'Withdrawal Pending.' });
@@ -292,3 +290,20 @@ function listenToHistoryLog() {
 function logout() {
     auth.signOut().then(() => { window.location.href = 'index.html'; });
 }
+
+// ==========================================
+// ১৫. REAL-TIME GATEWAY SYNC (এডমিন থেকে নাম্বার আপডেট সিঙ্ক)
+// ==========================================
+db.collection("settings").doc("gateways").onSnapshot(doc => {
+    if (doc.exists) {
+        const data = doc.data();
+        if (data.bkash) gatewayNumbers.Bkash = data.bkash + " (bKash Agent)";
+        if (data.nagad) gatewayNumbers.Nagad = data.nagad + " (Nagad Agent)";
+        
+        const adminNumberDisplay = document.getElementById('adminNumber');
+        const gatewayTitle = document.getElementById('gatewayTitle');
+        if (adminNumberDisplay && gatewayTitle) {
+            adminNumberDisplay.innerText = gatewayNumbers[gatewayTitle.innerText];
+        }
+    }
+});
