@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Core | Executive Admin Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .nav-link.active {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+            color: #10b981;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex">
+
+    <div id="loginScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-[9999]">
+        <div class="bg-slate-900 border border-white/5 p-8 rounded-2xl w-full max-w-sm shadow-2xl space-y-5 text-center">
+            <div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-xl mx-auto mb-3">Z</div>
+                <h2 class="text-lg font-black uppercase tracking-wider text-white">Admin Authentication</h2>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest">Secure Gateway Terminal</p>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Username</label>
+                    <input type="text" id="adminUser" placeholder="Enter Username" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-emerald-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Password</label>
+                    <input type="password" id="adminPass" placeholder="Enter Password" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-emerald-500 font-mono">
+                </div>
+            </div>
+            <button onclick="checkAdminLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold uppercase text-xs text-slate-950 transition shadow-lg shadow-emerald-950/20">Access Terminal</button>
+        </div>
+    </div>
+
+    <div id="adminDashboard" class="hidden w-full flex min-h-screen">
+        
+        <aside class="w-64 bg-slate-900 border-r border-white/5 flex flex-col fixed h-full z-50">
+            <div class="p-5 border-b border-white/5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-black">Z</div>
+                    <div>
+                        <h2 class="text-sm font-black uppercase tracking-wider text-emerald-400">Zenith Admin</h2>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Control Center v2.0</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 p-4 space-y-1">
+                <button onclick="switchTab('users')" id="btn-users" class="nav-link active w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-users w-4"></i> <span>User Controller</span>
+                </button>
+                <button onclick="switchTab('deposits')" id="btn-deposits" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-wallet w-4"></i> <span>Deposit Requests</span>
+                </button>
+                <button onclick="switchTab('withdraws')" id="btn-withdraws" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-money-bill-transfer w-4"></i> <span>Withdraw Requests</span>
+                </button>
+                <button onclick="switchTab('settings')" id="btn-settings" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-gears w-4"></i> <span>System Gateways</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-white/5 space-y-2">
+                <a href="https://dashboard.tawk.to/" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-center py-2.5 rounded-xl text-[10px] uppercase tracking-wider shadow-lg transition">
+                    <i class="fa-solid fa-headset mr-1"></i> Live Chat Console
+                </a>
+                <button onclick="adminLogout()" class="w-full bg-slate-800 hover:bg-red-950/40 text-slate-400 hover:text-red-400 font-bold py-2 rounded-xl text-[10px] uppercase transition border border-white/5">
+                    <i class="fa-solid fa-power-off mr-1"></i> Logout Terminal
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 pl-64 min-h-screen flex flex-col">
+            <header class="bg-slate-900/50 backdrop-blur px-8 py-4 border-b border-white/5 flex justify-between items-center sticky top-0 z-40">
+                <div>
+                    <h1 id="page-title" class="text-base font-black uppercase tracking-wider text-white">User Controller Node</h1>
+                    <p class="text-[10px] text-slate-500 uppercase">Manage profiles, credentials and balances</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">shamim040</span>
+                </div>
+            </header>
+
+            <div class="p-8 flex-1">
+                <section id="tab-users" class="tab-content active space-y-4">
+                    <div class="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4"><i class="fa-solid fa-id-card mr-2 text-emerald-400"></i> Registered Members Database</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-white/5 text-slate-500 font-bold uppercase text-[9px] tracking-wider">
+                                        <th class="pb-3">Email Address</th>
+                                        <th class="pb-3">Password Plaintext</th>
+                                        <th class="pb-3">Main Balance</th>
+                                        <th class="pb-3 text-center">Operational Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-deposits" class="tab-content space-y-4">
+                    <div class="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4"><i class="fa-solid fa-arrow-pointer mr-2 text-amber-400"></i> Inbound Deposit Verification Pipeline</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-white/5 text-slate-500 font-bold uppercase text-[9px]">
+                                        <th class="pb-3">User Email</th>
+                                        <th class="pb-3">Gateway / Amount</th>
+                                        <th class="pb-3">TrxID / Sender</th>
+                                        <th class="pb-3 text-center">Action Token</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="depositAdminTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-withdraws" class="tab-content space-y-4">
+                    <div class="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4"><i class="fa-solid fa-money-bill-transfer mr-2 text-blue-400"></i> Outbound Liquidation Pipeline</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-white/5 text-slate-500 font-bold uppercase text-[9px]">
+                                        <th class="pb-3">User Email</th>
+                                        <th class="pb-3">Gateway & Account</th>
+                                        <th class="pb-3">Amount Requested</th>
+                                        <th class="pb-3 text-center">Action Token</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawAdminTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-settings" class="tab-content space-y-4 max-w-md">
+                    <div class="bg-slate-900 border border-white/5 rounded-2xl p-6 shadow-xl space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2"><i class="fa-solid fa-sliders mr-2 text-purple-400"></i> Global Gateway Parameters</h3>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">bKash Agent Number</label>
+                            <input type="text" id="bkashNum" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Nagad Agent Number</label>
+                            <input type="text" id="nagadNum" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                        </div>
+                        <button onclick="updateNumbers()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold uppercase text-xs text-slate-950 transition">Save Configuration</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // এখানে আপনার ফায়ারবেস কনফিগারেশন বসান
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 🔐 আপনার দেওয়া ইউজারনেম এবং পাসওয়ার্ড দিয়ে লগইন ভ্যালিডেশন
+        function checkAdminLogin() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value.trim();
+
+            if (user === "shamim040" && pass === "12345") {
+                Swal.fire({ icon: 'success', title: 'Access Granted', text: 'Welcome back Shamim!', timer: 1500, showConfirmButton: false });
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                initAdminSystem(); // লগইন সাকসেস হলে ফায়ারবেস ডাটা লোড হবে
+            } else {
+                Swal.fire({ icon: 'error', title: 'Access Denied', text: 'Invalid Username or Password!' });
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('btn-' + tabId).classList.add('active');
+        }
+
+        // মূল ফায়ারবেস ডাটাবেজ ফাংশন যা লগইন করার পর চালু হবে
+        function initAdminSystem() {
+            // সব ইউজার লোড করার কোড
+            db.collection("users").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const userPass = user.password || "******";
+                    html += `
+                        <tr class="border-b border-white/5">
+                            <td class="py-3 font-bold text-slate-200">${user.email || 'N/A'}</td>
+                            <td class="py-3 font-mono text-amber-400">${userPass}</td>
+                            <td class="py-3 font-bold text-emerald-400">$${(parseFloat(user.balance) || 0).toFixed(2)}</td>
+                            <td class="py-3 text-center">
+                                <button onclick="editUserBalance('${doc.id}', ${user.balance || 0})" class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Edit Bal</button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('usersTableBody').innerHTML = html || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No users found.</td></tr>';
+            });
+
+            // গেটওয়ে নম্বর রিলোড
+            db.collection("settings").doc("gateways").get().then((doc) => {
+                if(doc.exists) {
+                    document.getElementById('bkashNum').value = doc.data().bkash || '';
+                    document.getElementById('nagadNum').value = doc.data().nagad || '';
+                }
+            });
+
+            // ডিপোজিট প্রসেস
+            db.collection("deposits").where("status", "==", "pending").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <tr class="border-b border-white/5">
+                            <td class="py-3">${data.email}</td>
+                            <td class="py-3 text-emerald-400 font-bold">${data.gateway} ($${data.amount})</td>
+                            <td class="py-3">${data.transactionId} <br><span class="text-[10px] text-slate-500">From: ${data.senderNumber}</span></td>
+                            <td class="py-3 text-center">
+                                <button onclick="approveDeposit('${doc.id}', '${data.uid}', ${data.amount})" class="bg-emerald-600 text-slate-950 font-black text-[10px] px-3 py-1.5 rounded-lg">Approve</button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('depositAdminTable').innerHTML = html || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No pending deposits.</td></tr>';
+            });
+
+            // উইথড্র প্রসেস
+            db.collection("withdraws").where("status", "==", "pending").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <tr class="border-b border-white/5">
+                            <td class="py-3">${data.email || 'User'}</td>
+                            <td class="py-3 text-blue-400 font-bold">${data.gateway} (${data.accountNumber})</td>
+                            <td class="py-3">$${data.amount}</td>
+                            <td class="py-3 text-center">
+                                <button onclick="approveWithdraw('${doc.id}')" class="bg-blue-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg">Mark Success</button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('withdrawAdminTable').innerHTML = html || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No pending withdrawals.</td></tr>';
+            });
+        }
+
+        function editUserBalance(uid, currentBal) {
+            Swal.fire({
+                title: 'Modify Balance',
+                input: 'number',
+                inputValue: currentBal,
+                showCancelButton: true,
+                confirmButtonText: 'Update'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    db.collection("users").doc(uid).update({ balance: parseFloat(result.value) })
+                    .then(() => { Swal.fire('Updated', 'User balance synced.', 'success'); });
+                }
+            });
+        }
+
+        function updateNumbers() {
+            const bkash = document.getElementById('bkashNum').value;
+            const nagad = document.getElementById('nagadNum').value;
+            db.collection("settings").doc("gateways").set({ bkash: bkash, nagad: nagad }, { merge: true })
+            .then(() => { Swal.fire('Success', 'Numbers Updated!', 'success'); });
+        }
+
+        function approveDeposit(docId, uid, amount) {
+            db.collection("deposits").doc(docId).update({ status: "success" }).then(() => {
+                const userRef = db.collection("users").doc(uid);
+                db.runTransaction(transaction => {
+                    return transaction.get(userRef).then(userDoc => {
+                        let currentBalance = userDoc.exists ? (parseFloat(userDoc.data().balance) || 0) : 0;
+                        transaction.set(userRef, { balance: currentBalance + amount }, { merge: true });
+                    });
+                }).then(() => { Swal.fire('Approved', 'Balance injected!', 'success'); });
+            });
+        }
+
+        function approveWithdraw(docId) {
+            db.collection("withdraws").doc(docId).update({ status: "success" }).then(() => {
+                Swal.fire('Success', 'Withdraw completed.', 'success');
+            });
+        }
+    </script>
+</body>
+</html>
