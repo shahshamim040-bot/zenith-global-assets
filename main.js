@@ -168,6 +168,8 @@ function processDailyYields(user) {
                     const totalEarned = node.dailyProfitAmount * daysPassed;
                     db.collection("users").doc(user.uid).update({ earningBalance: firebase.firestore.FieldValue.increment(totalEarned) });
                     db.collection("active_nodes").doc(doc.id).update({ lastClaimTime: firebase.firestore.FieldValue.serverTimestamp() });
+                    // অটো প্রফিট হিস্ট্রি
+                    db.collection("transactions").add({ userId: user.uid, type: "Daily Profit", amount: totalEarned, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
             }
         });
@@ -214,7 +216,6 @@ function submitDeposit() {
     };
 
     db.collection("deposits").add(depositPayload).then(() => {
-        // হিস্ট্রিতে পেন্ডিং এন্ট্রি যোগ করা হচ্ছে
         db.collection("transactions").add({
             userId: currentUser.uid,
             type: "Deposit (" + activeGateway + ")",
@@ -229,25 +230,36 @@ function submitDeposit() {
 }
 
 // ==========================================
-// ১১. ASSET DISINVESTMENT CORE
+// ১১. ASSET DISINVESTMENT CORE (Updated)
 // ==========================================
 function processWithdrawal() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const account = document.getElementById('withdrawAccount').value.trim();
     const gateway = document.getElementById('withdrawGateway').value.toUpperCase();
+    const currentBal = parseFloat(document.getElementById('userBalance').innerText);
     
-    const withdrawPayload = {
+    // ভ্যালিডেশন
+    if (amount < 20) {
+        CustomSwal.fire({ icon: 'error', title: 'Limit Error', text: 'মিনিমাম ২০ ডলার উইথড্র করতে হবে!' });
+        return;
+    }
+    if (amount > currentBal) {
+        CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'আপনার ব্যালেন্স নাই!' });
+        return;
+    }
+
+    const finalAmount = amount - 1; // ১ ডলার চার্জ
+
+    db.collection("withdraws").add({
         userId: currentUser.uid,
-        amount: amount,
+        amount: finalAmount,
         gateway: gateway,
         accountNumber: account,
         status: "Pending", 
         type: "Withdrawal",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    db.collection("withdraws").add(withdrawPayload).then(() => {
-        // উইথড্রল হিস্ট্রিতে এন্ট্রি
+    }).then(() => {
+        db.collection("users").doc(currentUser.uid).update({ balance: firebase.firestore.FieldValue.increment(-amount) });
         db.collection("transactions").add({
             userId: currentUser.uid,
             type: "Withdrawal (" + gateway + ")",
@@ -255,17 +267,21 @@ function processWithdrawal() {
             status: "Pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
-        CustomSwal.fire({ icon: 'warning', title: 'Pipeline Deployed', text: 'Withdrawal Pending.' });
+        CustomSwal.fire({ icon: 'success', title: 'Pipeline Deployed', text: 'উইথড্র রিকোয়েস্ট সফল! ১ ডলার চার্জ কাটা হয়েছে।' });
     });
 }
 
 // ==========================================
-// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX
+// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX (Updated)
 // ==========================================
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
-    if (currentBalance < cost) { return; }
+    
+    // ব্যালেন্স চেক
+    if (currentBalance < cost) {
+        CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'আপনার ব্যালেন্স নাই!' });
+        return;
+    }
 
     const nodePayload = {
         userId: currentUser.uid,
@@ -282,12 +298,11 @@ function buyPlan(cost, days, rate, planName) {
             activeInvestment: firebase.firestore.FieldValue.increment(cost)
         });
         
-        // ইনভেস্টমেন্ট হিস্ট্রি
         db.collection("transactions").add({
             userId: currentUser.uid,
             type: "Investment: " + planName,
-            cost: cost,
-            status: "Active",
+            amount: cost,
+            status: "Success",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
