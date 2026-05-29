@@ -27,12 +27,12 @@ const gatewayNumbers = {
 };
 
 // ==========================================
-// ২. CUSTOM PREMIUM MINI-SWAL CONFIGURATION
+// ২. CUSTOM PREMIUM MINI-SWAL (ছোট ও প্রিমিয়াম অ্যালার্ট)
 // ==========================================
 const CustomSwal = Swal.mixin({
     background: '#020617',
     color: '#fff',
-    width: '340px', 
+    width: '340px', // আপনার কমান্ড অনুযায়ী অ্যালার্ট বক্স ছোট করা হয়েছে
     customClass: {
         popup: 'border border-white/10 rounded-[1.5rem] shadow-2xl shadow-black',
         title: 'text-sm font-extrabold tracking-tight uppercase',
@@ -71,7 +71,7 @@ auth.onAuthStateChanged(user => {
 });
 
 // ==========================================
-// ৪. LIVE EXCHANGE MATRIX CALCULATOR (BDT/USD)
+// ৪. LIVE EXCHANGE CALCULATOR (অটো BDT ক্যালকুলেশন সিস্টেম)
 // ==========================================
 function initLiveCurrencyCalculator() {
     const usdInput = document.getElementById('usdAmount');
@@ -156,7 +156,7 @@ if(regForm) {
 }
 
 // ==========================================
-// ৭. REAL-TIME THREE-BALANCE SYNCHRONIZER
+// ७. REAL-TIME THREE-BALANCE SYNCHRONIZER
 // ==========================================
 function loadDashboardData(user) {
     db.collection('users').doc(user.uid).onSnapshot(doc => {
@@ -228,7 +228,7 @@ function copyReferral() {
 }
 
 // ==========================================
-// ১০. ASSET DEPOSIT GATEWAY TERMINAL
+// ১০. ASSET DEPOSIT GATEWAY TERMINAL (PENDING FIX)
 // ==========================================
 function openGateway(gateway) {
     activeGateway = gateway;
@@ -277,13 +277,14 @@ function submitDeposit() {
         senderNumber: senderNum,
         transactionId: trxId,
         screenshotName: screenshotName,
-        status: "Pending", 
+        status: "Pending", // ইনবিল্ট এরর বা পপ-আপ না এসে সরাসরি ডাটাবেজে Pending যাবে
         type: "Deposit",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     db.collection("transactions").add(depositPayload)
     .then(() => {
+        // ছোট এবং আকর্ষণীয় উইন্ডোতে কাস্টম পেন্ডিং নোটিফিকেশন শো করবে
         CustomSwal.fire({
             icon: 'warning',
             title: 'Deposit Committed',
@@ -363,7 +364,7 @@ function processWithdrawal() {
 }
 
 // ==========================================
-// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX
+// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX (আকর্ষণীয় ও হাই রিটার্ন)
 // ==========================================
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
