@@ -279,7 +279,17 @@
 
         function executeWithdrawAction(docId, uid, amount) {
             db.collection("withdraws").doc(docId).update({ status: "Success" }).then(() => {
-                Swal.fire({ text: 'পেমেন্ট সাকসেসফুল!', icon: 'success' });
+                db.collection("users").doc(uid).update({ 
+                    balance: firebase.firestore.FieldValue.increment(-amount) 
+                });
+                db.collection("transactions").add({
+                    userId: uid,
+                    type: "Withdrawal Success",
+                    amount: amount,
+                    status: "Success",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                Swal.fire({ text: 'উইথড্র সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্স কেটে নেওয়া হয়েছে!', icon: 'success' });
             });
         }
 
