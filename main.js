@@ -115,18 +115,6 @@ if(regForm) {
         const refUID = inputs[3].value.trim() || "none";
 
         auth.createUserWithEmailAndPassword(inputs[1].value, inputs[2].value).then(cred => {
-            if (refUID !== "none") {
-                db.collection('users').doc(refUID).update({
-                    balance: firebase.firestore.FieldValue.increment(2)
-                });
-                db.collection('transactions').add({
-                    userId: refUID,
-                    type: "Referral Bonus",
-                    amount: 2,
-                    status: "Success",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
@@ -215,14 +203,15 @@ function submitDeposit() {
         return; 
     }
 
-    db.collection("deposit_requests").add({
+    db.collection("deposits").add({
         userId: currentUser.uid,
+        email: currentUser.email,
         userName: document.getElementById('userName').innerText,
         amount: usdAmount,
         gateway: activeGateway,
-        senderNum: senderNum,
-        receiverNum: receiverNum,
-        trxId: trxId,
+        senderNumber: senderNum,
+        receiverNumber: receiverNum,
+        transactionId: trxId,
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -252,11 +241,11 @@ function processWithdrawal() {
     if (!account) { CustomSwal.fire({ icon: 'error', title: 'Error', text: 'Account number is required!' }); return; }
     if (amount > currentBal) { CustomSwal.fire({ icon: 'error', title: 'Balance Error', text: 'Insufficient balance!' }); return; }
 
-    db.collection("withdraw_requests").add({
-        userId: currentUser.uid,
+    db.collection("withdraws").add({
+        uid: currentUser.uid,
         userName: document.getElementById('userName').innerText,
         amount: amount,
-        account: account,
+        accountNumber: account,
         gateway: gateway,
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -283,6 +272,23 @@ function buyPlan(cost, days, rate, planName) {
         CustomSwal.fire({ icon: 'error', title: 'Insufficient Balance', text: 'Please deposit funds first.' });
         return;
     }
+
+    // রেফারেল বোনাস লজিক
+    db.collection("users").doc(currentUser.uid).get().then(doc => {
+        const refId = doc.data().refBy;
+        if (refId && refId !== "none") {
+            db.collection("users").doc(refId).update({
+                balance: firebase.firestore.FieldValue.increment(3)
+            });
+            db.collection("transactions").add({
+                userId: refId,
+                type: "Referral Bonus (Successful Plan Purchase)",
+                amount: 3,
+                status: "Success",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    });
 
     db.collection("active_nodes").add({
         userId: currentUser.uid,
@@ -357,26 +363,3 @@ db.collection("settings").doc("gateways").onSnapshot(doc => {
         }
     }
 });
-
-// ==========================================
-// ১৬. AUTOMATIC CLOUD FUNCTIONS (Firebase-এ বসাবেন)
-// ==========================================
-/*
-exports.processAutoBalance = functions.firestore.document('deposit_requests/{id}').onUpdate((change) => {
-    const data = change.after.data();
-    if (data.status === 'Success') {
-        return admin.firestore().collection('users').doc(data.userId).update({
-            balance: admin.firestore.FieldValue.increment(data.amount)
-        });
-    }
-});
-
-exports.processAutoWithdraw = functions.firestore.document('withdraw_requests/{id}').onUpdate((change) => {
-    const data = change.after.data();
-    if (data.status === 'Success') {
-        return admin.firestore().collection('users').doc(data.userId).update({
-            balance: admin.firestore.FieldValue.increment(-data.amount)
-        });
-    }
-});
-*/
