@@ -44,6 +44,21 @@ const CustomSwal = Swal.mixin({
 });
 
 // ==========================================
+// ২.১. NEW: PERMANENT HISTORY SAVER (আজীবন সেভ লজিক)
+// ==========================================
+function saveUserPermanentHistory(type, amount, status) {
+    if (!currentUser) return;
+    const currentBalance = document.getElementById('userBalance') ? document.getElementById('userBalance').innerText : 0;
+    db.collection('users').doc(currentUser.uid).collection('permanent_history').add({
+        type: type,
+        amount: amount,
+        status: status,
+        balanceAtThatTime: currentBalance,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+// ==========================================
 // ৩. PRO REDIRECT & SECURE SESSION SYSTEM
 // ==========================================
 auth.onAuthStateChanged(user => {
@@ -167,6 +182,7 @@ function processDailyYields(user) {
                 db.collection("users").doc(user.uid).update({ earningBalance: firebase.firestore.FieldValue.increment(totalEarned) });
                 db.collection("active_nodes").doc(doc.id).update({ lastClaimTime: firebase.firestore.FieldValue.serverTimestamp() });
                 db.collection("transactions").add({ userId: user.uid, type: "Daily Profit", amount: totalEarned, status: "Success", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                saveUserPermanentHistory("Daily Profit", totalEarned, "Success");
             }
         });
     });
@@ -223,6 +239,7 @@ function submitDeposit() {
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
+        saveUserPermanentHistory("Deposit", usdAmount, "Pending");
         CustomSwal.fire({ icon: 'warning', title: 'Deposit Committed', text: 'Awaiting Admin Approval.' });
         document.getElementById('paymentBox').classList.add('hidden');
     });
@@ -258,6 +275,7 @@ function processWithdrawal() {
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
+        saveUserPermanentHistory("Withdrawal", amount, "Pending");
         CustomSwal.fire({ icon: 'success', title: 'Pipeline Deployed', text: 'Withdrawal request under review.' });
     });
 }
@@ -273,7 +291,6 @@ function buyPlan(cost, days, rate, planName) {
         return;
     }
 
-    // রেফারেল বোনাস লজিক
     db.collection("users").doc(currentUser.uid).get().then(doc => {
         const refId = doc.data().refBy;
         if (refId && refId !== "none") {
@@ -311,6 +328,7 @@ function buyPlan(cost, days, rate, planName) {
             status: "Success",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+        saveUserPermanentHistory("Investment", cost, "Success");
         
         CustomSwal.fire({ icon: 'success', title: 'Active Node', text: 'Node deployed successfully.' });
     });
