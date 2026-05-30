@@ -158,6 +158,17 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
+        // --- নতুন ফাংশন ---
+        function viewUserHistory(uid, email) {
+            db.collection("users").doc(uid).collection("permanent_history").orderBy("timestamp", "desc").get().then(snapshot => {
+                let html = `<div class="text-left text-xs space-y-2">`;
+                snapshot.forEach(doc => { const data = doc.data(); html += `<div class="border-b border-white/5 pb-1"><span class="text-emerald-400">${data.type}</span>: $${data.amount} <br><span class="text-[9px] text-slate-500">Bal: $${data.balanceAtThatTime}</span></div>`; });
+                html += `</div>`;
+                Swal.fire({ title: 'History: ' + email, html: html || 'No data', background: '#0b0f19', color: '#fff' });
+            });
+        }
+        // ----------------
+
         window.onload = function() {
             const currentAdminSession = localStorage.getItem("activeAdminToken");
             if (currentAdminSession) { initializeSecureConsole(currentAdminSession); }
@@ -220,7 +231,10 @@
                     usersHtml += `<div class="bg-[#0b0f19] border border-white/5 p-3.5 rounded-xl space-y-2">
                         <p class="text-[8px] text-slate-500 uppercase font-black">User: ${user.email || 'N/A'}</p>
                         <div class="flex justify-between text-[10px]"><span class="text-slate-400">Balance:</span><strong class="text-emerald-400">$${(user.balance || 0).toFixed(2)}</strong></div>
-                        <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="w-full bg-slate-800 text-[9px] py-1.5 rounded-lg font-bold uppercase">Modify</button>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="bg-slate-800 text-[9px] py-1.5 rounded-lg font-bold uppercase">Modify</button>
+                            <button onclick="viewUserHistory('${doc.id}', '${user.email}')" class="bg-blue-900 text-[9px] py-1.5 rounded-lg font-bold uppercase">History</button>
+                        </div>
                     </div>`;
                 });
                 document.getElementById('totalCorporateInvestment').innerText = "$" + corporateTotal.toFixed(2);
@@ -266,13 +280,6 @@
         function executeDepositAction(docId, uid, amount, gateway, trxId) {
             db.collection("deposits").doc(docId).update({ status: "Success" }).then(() => {
                 db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(amount) });
-                db.collection("transactions").add({
-                    userId: uid,
-                    type: "Deposit (" + gateway + ")",
-                    amount: amount,
-                    status: "Success",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
                 Swal.fire({ text: 'সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্সে যোগ হয়েছে!', icon: 'success' });
             });
         }
@@ -281,13 +288,6 @@
             db.collection("withdraws").doc(docId).update({ status: "Success" }).then(() => {
                 db.collection("users").doc(uid).update({ 
                     balance: firebase.firestore.FieldValue.increment(-amount) 
-                });
-                db.collection("transactions").add({
-                    userId: uid,
-                    type: "Withdrawal Success",
-                    amount: amount,
-                    status: "Success",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 Swal.fire({ text: 'উইথড্র সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্স কেটে নেওয়া হয়েছে!', icon: 'success' });
             });
@@ -316,4 +316,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
