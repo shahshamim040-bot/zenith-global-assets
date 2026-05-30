@@ -133,7 +133,7 @@ if(regForm) {
             return db.collection('users').doc(cred.user.uid).set({
                 fullName: inputs[0].value,
                 email: inputs[1].value,
-                balance: 0.00,
+                balance: 1.00, // রেজিস্ট্রেশনে ১ ডলার অটো জমা
                 earningBalance: 0.00,
                 activeInvestment: 0.00,
                 purchasedCount: 0,
@@ -189,13 +189,26 @@ function processDailyYields(user) {
 }
 
 // ==========================================
-// ৯. CLONE REFERRAL TO CLIPBOARD
+// ৯. REFERRAL SYSTEM LOGIC (Updated with Copy & Share)
 // ==========================================
 function copyReferral() {
     const linkText = document.getElementById('refLinkText').innerText;
     navigator.clipboard.writeText(linkText).then(() => {
         CustomSwal.fire({ icon: 'success', title: 'Cloned!', text: 'Referral link copied!' });
     });
+}
+
+function shareReferral() {
+    const linkText = document.getElementById('refLinkText').innerText;
+    if (navigator.share) {
+        navigator.share({
+            title: 'Join Zenith Global',
+            text: 'Check out this platform and earn rewards!',
+            url: linkText,
+        }).catch(console.error);
+    } else {
+        copyReferral();
+    }
 }
 
 // ==========================================
@@ -281,7 +294,7 @@ function processWithdrawal() {
 }
 
 // ==========================================
-// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX
+// ১২. DEPLOY LOVABLE HIGH-YIELD PLAN MATRIX (Referral Logic Added)
 // ==========================================
 function buyPlan(cost, days, rate, planName) {
     const currentBalance = parseFloat(document.getElementById('userBalance').innerText);
@@ -292,15 +305,24 @@ function buyPlan(cost, days, rate, planName) {
     }
 
     db.collection("users").doc(currentUser.uid).get().then(doc => {
-        const refId = doc.data().refBy;
+        const userData = doc.data();
+        const refId = userData.refBy;
+        
+        // রেফারেল বোনাস লজিক: প্ল্যান কেনার সাথে সাথে উভয়কে ১ ডলার করে প্রদান
         if (refId && refId !== "none") {
+            // ১ ডলার রেফারারকে
             db.collection("users").doc(refId).update({
-                balance: firebase.firestore.FieldValue.increment(3)
+                balance: firebase.firestore.FieldValue.increment(1)
             });
+            // ১ ডলার নতুন ইউজারকে
+            db.collection("users").doc(currentUser.uid).update({
+                balance: firebase.firestore.FieldValue.increment(1)
+            });
+            
             db.collection("transactions").add({
                 userId: refId,
-                type: "Referral Bonus (Successful Plan Purchase)",
-                amount: 3,
+                type: "Referral Bonus (Plan Purchase)",
+                amount: 1,
                 status: "Success",
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
