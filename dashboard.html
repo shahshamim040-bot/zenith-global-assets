@@ -58,6 +58,12 @@
                 <button onclick="switchTab('history')" id="nav-history" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-clock-history text-base"></i> <span>Audit Log / History</span>
                 </button>
+                
+                <div class="mt-6 mx-4 p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-2xl text-center">
+                    <h3 class="text-[10px] font-black uppercase text-emerald-400 mb-2">Refer & Earn</h3>
+                    <div id="refLinkText" class="text-[9px] bg-black p-2 rounded mb-2 text-slate-400 break-all border border-white/5">Generating...</div>
+                    <button onclick="copyReferral()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] py-1.5 rounded transition font-bold uppercase tracking-widest">Copy Referral Link</button>
+                </div>
             </nav>
         </div>
         <div class="p-4 border-t border-white/5">
@@ -363,8 +369,7 @@
             }
             liveChart.update();
         }, 2000);
-    </script><!--Start of Tawk.to Script-->
-<script type="text/javascript">
+    </script><script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -375,6 +380,5 @@ s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
-<!--End of Tawk.to Script-->
 </body>
 </html>
