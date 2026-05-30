@@ -158,43 +158,26 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        // [NEW] User Management & Ban System
-        function toggleBanUser(uid, currentStatus) {
-            const newStatus = currentStatus === 'Banned' ? 'Active' : 'Banned';
-            db.collection("users").doc(uid).update({ status: newStatus })
-              .then(() => Swal.fire({ text: 'User status updated to: ' + newStatus, icon: 'success' }));
-        }
-
-        // [NEW] Enhanced Rejection System
-        function rejectActionWithReason(col, docId, uid) {
-            Swal.fire({
-                title: 'Reject Request',
-                input: 'text',
-                inputLabel: 'রিজেক্টের কারণ লিখুন:',
-                showCancelButton: true,
-                confirmButtonText: 'Submit'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.collection(col).doc(docId).update({ status: "Failed", reason: result.value });
-                    Swal.fire({ text: 'রিজেক্ট করা হয়েছে!', icon: 'warning' });
-                }
-            });
-        }
-
+        // --- নতুন ফাংশন ---
         function viewUserHistory(uid, email) {
             db.collection("users").doc(uid).collection("permanent_history").orderBy("timestamp", "desc").get().then(snapshot => {
                 let html = `<div class="text-left text-xs space-y-2">`;
-                snapshot.forEach(doc => { const data = doc.data(); html += `<div class="border-b border-white/5 pb-1"><span class="text-emerald-400">${data.type}</span>: $${data.amount} <br><span class="text-[9px] text-slate-500">Status: ${data.status || 'Success'}</span></div>`; });
+                snapshot.forEach(doc => { const data = doc.data(); html += `<div class="border-b border-white/5 pb-1"><span class="text-emerald-400">${data.type}</span>: $${data.amount} <br><span class="text-[9px] text-slate-500">Bal: $${data.balanceAtThatTime}</span></div>`; });
                 html += `</div>`;
                 Swal.fire({ title: 'History: ' + email, html: html || 'No data', background: '#0b0f19', color: '#fff' });
             });
         }
+        // ----------------
 
         window.onload = function() {
             const currentAdminSession = localStorage.getItem("activeAdminToken");
             if (currentAdminSession) { initializeSecureConsole(currentAdminSession); }
+            
             db.collection("settings").doc("gateways").onSnapshot(doc => {
-                if(doc.exists) { document.getElementById('dbBkashNum').value = doc.data().bkash || ''; document.getElementById('dbNagadNum').value = doc.data().nagad || ''; }
+                if(doc.exists) {
+                    document.getElementById('dbBkashNum').value = doc.data().bkash || '';
+                    document.getElementById('dbNagadNum').value = doc.data().nagad || '';
+                }
             });
         };
 
@@ -209,7 +192,9 @@
                     if (doc.exists && doc.data().password === inputPass) {
                         localStorage.setItem("activeAdminToken", inputUser);
                         initializeSecureConsole(inputUser);
-                    } else { Swal.fire({ text: 'ভুল সিকিউরিটি ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0b0f19', color: '#fff' }); }
+                    } else {
+                        Swal.fire({ text: 'ভুল সিকিউরিটি ইউজারনেম অথবা পাসওয়ার্ড!', icon: 'error', background: '#0b0f19', color: '#fff' });
+                    }
                 });
             }
         }
@@ -221,29 +206,34 @@
             runLiveSyncModules();
         }
 
-        function terminateAdminSession() { localStorage.removeItem("activeAdminToken"); window.location.reload(); }
+        function terminateAdminSession() {
+            localStorage.removeItem("activeAdminToken");
+            window.location.reload();
+        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             const navButtons = btn.parentElement.querySelectorAll('button');
             navButtons.forEach(b => { b.classList.remove('text-emerald-400'); b.classList.add('text-slate-400'); });
-            btn.classList.remove('text-slate-400'); btn.classList.add('text-emerald-400');
+            btn.classList.remove('text-slate-400');
+            btn.classList.add('text-emerald-400');
         }
 
         function runLiveSyncModules() {
             db.collection("users").onSnapshot(snapshot => {
-                let corporateTotal = 0; let usersHtml = "";
+                let corporateTotal = 0;
+                let usersHtml = "";
                 snapshot.forEach(doc => {
                     const user = doc.data();
-                    corporateTotal += parseFloat(user.totalInvestment) || 0;
-                    usersHtml += `<div class="bg-[#0b0f19] border ${user.status === 'Banned' ? 'border-red-500' : 'border-white/5'} p-3.5 rounded-xl space-y-2">
+                    const investment = parseFloat(user.totalInvestment) || 0;
+                    corporateTotal += investment;
+                    usersHtml += `<div class="bg-[#0b0f19] border border-white/5 p-3.5 rounded-xl space-y-2">
                         <p class="text-[8px] text-slate-500 uppercase font-black">User: ${user.email || 'N/A'}</p>
                         <div class="flex justify-between text-[10px]"><span class="text-slate-400">Balance:</span><strong class="text-emerald-400">$${(user.balance || 0).toFixed(2)}</strong></div>
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <button onclick="modifyUserBalancePrompt('${doc.id}', ${user.balance || 0})" class="bg-slate-800 text-[9px] py-1.5 rounded-lg font-bold uppercase">Modify</button>
                             <button onclick="viewUserHistory('${doc.id}', '${user.email}')" class="bg-blue-900 text-[9px] py-1.5 rounded-lg font-bold uppercase">History</button>
-                            <button onclick="toggleBanUser('${doc.id}', '${user.status || 'Active'}')" class="${user.status === 'Banned' ? 'bg-green-700' : 'bg-red-700'} col-span-2 text-[9px] py-1.5 rounded-lg font-bold uppercase">${user.status === 'Banned' ? 'Unban User' : 'Ban User'}</button>
                         </div>
                     </div>`;
                 });
@@ -260,10 +250,11 @@
                             <p class="text-[10px] text-slate-400">User: ${data.email || 'N/A'}</p>
                             <p class="text-xs font-bold text-emerald-400">Gateway: ${data.gateway}</p>
                             <p class="text-xs font-bold">TrxID: ${data.transactionId || 'N/A'}</p>
+                            <p class="text-xs font-bold text-amber-400">Number: ${data.senderNumber || 'N/A'}</p>
                             <p class="text-xs text-white">Amount: $${data.amount}</p>
                             <div class="grid grid-cols-2 gap-2 mt-2">
-                                <button onclick="executeDepositAction('${doc.id}', '${data.userId}', ${data.amount})" class="bg-emerald-600 text-xs py-1.5 rounded font-bold">Approve</button>
-                                <button onclick="rejectActionWithReason('deposits', '${doc.id}', '${data.userId}')" class="bg-red-900 text-xs py-1.5 rounded font-bold">Reject</button>
+                                <button onclick="executeDepositAction('${doc.id}', '${data.userId}', ${data.amount}, '${data.gateway}', '${data.transactionId}')" class="bg-emerald-600 text-xs py-1.5 rounded font-bold">Approve</button>
+                                <button onclick="rejectAction('deposits', '${doc.id}')" class="bg-red-900 text-xs py-1.5 rounded font-bold">Reject</button>
                             </div>
                         </div>`;
                     }
@@ -277,12 +268,8 @@
                     const data = doc.data();
                     if(data.status === "Pending") {
                         html += `<div class="bg-[#0b0f19] border border-blue-500/10 p-3.5 rounded-xl space-y-1">
-                            <p class="text-xs text-slate-200">Acc: ${data.accountNumber} (${data.gateway})</p>
-                            <p class="text-xs text-white font-bold">$${data.amount}</p>
-                            <div class="grid grid-cols-2 gap-2 mt-2">
-                                <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${data.amount})" class="bg-blue-600 text-xs py-1.5 rounded font-bold">Paid</button>
-                                <button onclick="rejectActionWithReason('withdraws', '${doc.id}', '${data.uid}')" class="bg-red-900 text-xs py-1.5 rounded font-bold">Reject</button>
-                            </div>
+                            <p class="text-xs text-slate-200">Acc: ${data.accountNumber}: $${data.amount}</p>
+                            <button onclick="executeWithdrawAction('${doc.id}', '${data.uid}', ${data.amount})" class="w-full bg-blue-600 text-xs py-2 mt-2 rounded font-bold">Paid</button>
                         </div>`;
                     }
                 });
@@ -290,21 +277,43 @@
             });
         }
 
-        function executeDepositAction(docId, uid, amount) { 
-            db.collection("deposits").doc(docId).update({ status: "Success" }).then(() => { 
-                db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(amount) }); 
-                Swal.fire({ text: 'সফলভাবে এপ্রুভ হয়েছে!', icon: 'success' }); 
-            }); 
+        function executeDepositAction(docId, uid, amount, gateway, trxId) {
+            db.collection("deposits").doc(docId).update({ status: "Success" }).then(() => {
+                db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(amount) });
+                Swal.fire({ text: 'সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্সে যোগ হয়েছে!', icon: 'success' });
+            });
         }
-        function executeWithdrawAction(docId, uid, amount) { 
-            db.collection("withdraws").doc(docId).update({ status: "Success" }).then(() => { 
-                db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(-amount) }); 
-                Swal.fire({ text: 'উইথড্র সফল হয়েছে!', icon: 'success' }); 
-            }); 
+
+        function executeWithdrawAction(docId, uid, amount) {
+            db.collection("withdraws").doc(docId).update({ status: "Success" }).then(() => {
+                db.collection("users").doc(uid).update({ 
+                    balance: firebase.firestore.FieldValue.increment(-amount) 
+                });
+                Swal.fire({ text: 'উইথড্র সফলভাবে এপ্রুভ হয়েছে এবং ব্যালেন্স কেটে নেওয়া হয়েছে!', icon: 'success' });
+            });
         }
-        function saveGatewayNumbers() { const bkash = document.getElementById('dbBkashNum').value.trim(); const nagad = document.getElementById('dbNagadNum').value.trim(); db.collection("settings").doc("gateways").set({ bkash, nagad }, { merge: true }).then(() => Swal.fire({ text: 'সেভ হয়েছে!', icon: 'success' })); }
-        function provisionSubAdmin() { const user = document.getElementById('subUser').value.trim(); const pass = document.getElementById('subPass').value.trim(); db.collection("sub_admins").doc(user).set({ password: pass }).then(() => Swal.fire({ text: 'সাব-এডমিন তৈরি!', icon: 'success' })); }
-        function modifyUserBalancePrompt(uid, currentBal) { Swal.fire({ title: 'Modify Balance', input: 'number', inputValue: currentBal, showCancelButton: true, confirmButtonColor: '#059669' }).then((result) => { if (result.isConfirmed) db.collection("users").doc(uid).update({ balance: parseFloat(result.value) }).then(() => Swal.fire({ text: 'আপডেট সফল!', icon: 'success' })); }); }
+
+        function rejectAction(col, docId) {
+            db.collection(col).doc(docId).update({ status: "Failed" }).then(() => Swal.fire({ text: 'রিজেক্ট করা হয়েছে!', icon: 'warning' }));
+        }
+
+        function saveGatewayNumbers() {
+            const bkash = document.getElementById('dbBkashNum').value.trim();
+            const nagad = document.getElementById('dbNagadNum').value.trim();
+            db.collection("settings").doc("gateways").set({ bkash, nagad }, { merge: true }).then(() => Swal.fire({ text: 'সেভ হয়েছে!', icon: 'success' }));
+        }
+
+        function provisionSubAdmin() {
+            const user = document.getElementById('subUser').value.trim();
+            const pass = document.getElementById('subPass').value.trim();
+            db.collection("sub_admins").doc(user).set({ password: pass }).then(() => Swal.fire({ text: 'সাব-এডমিন তৈরি!', icon: 'success' }));
+        }
+
+        function modifyUserBalancePrompt(uid, currentBal) {
+            Swal.fire({ title: 'Modify Balance', input: 'number', inputValue: currentBal, showCancelButton: true, confirmButtonColor: '#059669' }).then((result) => {
+                if (result.isConfirmed) db.collection("users").doc(uid).update({ balance: parseFloat(result.value) }).then(() => Swal.fire({ text: 'আপডেট সফল!', icon: 'success' }));
+            });
+        }
     </script>
 </body>
-</html>
+    </html>
